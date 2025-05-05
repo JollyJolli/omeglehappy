@@ -1,0 +1,139 @@
+(() => {
+    const overlay = document.createElement('div');
+    overlay.id = 'ip-overlay';
+    overlay.innerText = '⏳ Obteniendo dirección IP...\nHecho por Formen';
+
+    Object.assign(overlay.style, {
+        position: 'fixed',
+        top: '10px',
+        right: '10px',
+        background: '#002b1d',
+        color: '#00ff88',
+        padding: '12px 18px',
+        borderRadius: '12px',
+        fontFamily: 'monospace',
+        fontSize: '13px',
+        zIndex: '999999',
+        maxWidth: '300px',
+        whiteSpace: 'pre-wrap',
+        boxShadow: '0 0 12px #00ff88',
+        transition: 'all 0.3s ease-in-out'
+    });
+
+    // Botón pa' minimizar el HUD
+    const toggleBtn = document.createElement('button');
+    toggleBtn.innerText = '–';
+    Object.assign(toggleBtn.style, {
+        position: 'absolute',
+        top: '4px',
+        right: '6px',
+        background: 'transparent',
+        color: '#00ff88',
+        border: 'none',
+        fontSize: '16px',
+        cursor: 'pointer',
+        fontWeight: 'bold'
+    });
+
+    toggleBtn.onclick = () => {
+        const content = overlay.querySelector('.ip-content');
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            toggleBtn.innerText = '–';
+        } else {
+            content.style.display = 'none';
+            toggleBtn.innerText = '+';
+        }
+    };
+
+    overlay.appendChild(toggleBtn);
+
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'ip-content';
+    overlay.appendChild(contentDiv);
+
+    document.body.appendChild(overlay);
+
+    const updateOverlay = (data) => {
+        const lat = parseFloat(data.latitude);
+        const lon = parseFloat(data.longitude);
+        const offset = 0.02;
+
+        const iframe = `
+            <iframe 
+                src="https://www.openstreetmap.org/export/embed.html?bbox=${lon - offset}%2C${lat - offset}%2C${lon + offset}%2C${lat + offset}&layer=mapnik&marker=${lat}%2C${lon}" 
+                width="100%" 
+                height="200" 
+                style="border: 1px solid #00ff88; border-radius: 8px; margin-top: 8px;"
+                allowfullscreen>
+            </iframe>
+        `;
+
+        contentDiv.innerHTML = `
+            🔥 <b>IP:</b> ${data.ip}<br>
+            🌍 <b>País:</b> ${data.country_name} ${data.country_flag_emoji || ''}<br>
+            🏙️ <b>Ciudad:</b> ${data.city}<br>
+            🛰️ <b>Proveedor (ISP):</b> ${data.isp}<br>
+            📡 <b>Organización:</b> ${data.organization}<br>
+            🌐 <b>Continente:</b> ${data.continent_name}<br>
+            🧭 <b>Latitud:</b> ${lat}<br>
+            🧭 <b>Longitud:</b> ${lon}<br>
+            ${iframe}
+            <br><small>Hecho con 💻 por Formen</small>
+        `;
+    };
+
+    const showError = (msg) => {
+        contentDiv.innerText = `❌ Error detectado:\n${msg}\n\nHecho por Formen`;
+        overlay.style.color = '#ff4d4d';
+        overlay.style.boxShadow = '0 0 12px #ff4d4d';
+    };
+
+    const fetchIPInfo = async (ip) => {
+        try {
+            const res = await fetch(`https://api.ipgeolocation.io/ipgeo?apiKey=c9cf4f25c80f4732adb70fcb02c53338&ip=${ip}`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const json = await res.json();
+            updateOverlay(json);
+        } catch (e) {
+            showError("No fue posible obtener información de la IP:\n" + e.message);
+            console.error("Hecho por Formen - Error:", e);
+        }
+    };
+
+    let lastIP = null;
+
+    const handleCandidate = (candidate) => {
+        try {
+            const parts = candidate.candidate.split(' ');
+            const ip = parts[4];
+            const type = parts[7];
+            if (type === 'srflx' && ip !== lastIP) {
+                lastIP = ip;
+                fetchIPInfo(ip);
+            }
+        } catch (e) {
+            showError("Error al analizar el candidato ICE:\n" + e.message);
+        }
+    };
+
+    const originalPeerConnection = window.RTCPeerConnection;
+    if (!originalPeerConnection) {
+        showError("Este navegador no es compatible con WebRTC 🤖\nHecho por Formen");
+        return;
+    }
+
+    window.RTCPeerConnection = function (...args) {
+        const pc = new originalPeerConnection(...args);
+        const originalAddIceCandidate = pc.addIceCandidate;
+        pc.addIceCandidate = function (iceCandidate, ...rest) {
+            if (iceCandidate && iceCandidate.candidate) {
+                handleCandidate(iceCandidate);
+            }
+            return originalAddIceCandidate.call(this, iceCandidate, ...rest);
+        };
+        return pc;
+    };
+
+    console.log("✅ HUD de IP activo. Monitorizando WebRTC...\nHecho por Formen");
+})();
