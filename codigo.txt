@@ -6,10 +6,12 @@
             <span class="overlay-title">🔍 IP Info</span>
             <div class="overlay-controls">
                 <button id="toggle-btn">–</button>
+                <button id="history-btn">📜</button>
                 <button id="censor-btn">🙈</button>
             </div>
         </div>
         <div class="ip-content"></div>
+        <div class="ip-history" style="display:none; padding: 12px; font-size: 12px; color: #ccc;"></div>
         <div class="overlay-footer">Hecho con 💻 por Jolly</div>
     `;
 
@@ -17,7 +19,7 @@
         position: 'fixed',
         top: '20px',
         left: '20px',
-        width: '320px',
+        width: '340px',
         background: '#111',
         color: '#eee',
         fontFamily: 'Arial, sans-serif',
@@ -49,7 +51,7 @@
             color: #0f0;
             font-size: 14px;
             cursor: pointer;
-            margin-left: 8px;
+            margin-left: 6px;
         }
         .ip-content {
             padding: 12px;
@@ -70,17 +72,26 @@
 
     document.body.appendChild(overlay);
 
-    // Minimizar y censurar
     const toggleBtn = overlay.querySelector('#toggle-btn');
     const censorBtn = overlay.querySelector('#censor-btn');
+    const historyBtn = overlay.querySelector('#history-btn');
     const contentDiv = overlay.querySelector('.ip-content');
+    const historyDiv = overlay.querySelector('.ip-history');
+
     let isCensored = false;
     let originalIP = '';
+    let lastIP = null;
 
     toggleBtn.onclick = () => {
         const isHidden = contentDiv.style.display === 'none';
         contentDiv.style.display = isHidden ? 'block' : 'none';
         toggleBtn.innerText = isHidden ? '–' : '+';
+    };
+
+    historyBtn.onclick = () => {
+        const isVisible = historyDiv.style.display === 'block';
+        if (!isVisible) renderHistory();
+        historyDiv.style.display = isVisible ? 'none' : 'block';
     };
 
     censorBtn.onclick = () => {
@@ -94,27 +105,52 @@
         }
     };
 
-    const updateOverlay = (data) => {
-    originalIP = data.ip;
-    const currentTime = new Date(data.time_zone?.current_time).toLocaleTimeString('es-MX', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-    });
+    const saveToHistory = (entry) => {
+        let history = JSON.parse(localStorage.getItem('ipHistory') || '[]');
+        history.unshift(entry); // Añade al principio
+        if (history.length > 10) history = history.slice(0, 10); // Solo 10
+        localStorage.setItem('ipHistory', JSON.stringify(history));
+    };
 
-    contentDiv.innerHTML = `
-        🔥 <b>IP:</b> ${isCensored ? '***.***.***.***' : data.ip}<br>
-        🌍 <b>País:</b> ${data.country_name} (${data.country_code}) ${data.country_flag_emoji || ''}<br>
-        🧭 <b>Región:</b> ${data.state_prov}<br>
-        🏙️ <b>Ciudad:</b> ${data.city}<br>
-        🌐 <b>Continente:</b> ${data.continent_name}<br>
-        📍 <b>Lat/Lon:</b> ${data.latitude}, ${data.longitude}<br>
-        🛰️ <b>ISP:</b> ${data.isp}<br>
-        🧬 <b>Org:</b> ${data.organization}<br>
-        ⏰ <b>Hora Local:</b> ${currentTime}<br>
-        💸 <b>Moneda:</b> ${data.currency?.name || 'N/A'} (${data.currency?.code || ''})
-    `;
-};
+    const renderHistory = () => {
+        let history = JSON.parse(localStorage.getItem('ipHistory') || '[]');
+        if (!history.length) {
+            historyDiv.innerHTML = '📭 Sin historial todavía.';
+            return;
+        }
+        historyDiv.innerHTML = '<b>📜 Historial:</b><br><br>' + history.map((h, i) => {
+            return `${i + 1}.- ${h.flag || ''} ${h.country} - ${h.city} - ${h.ip}`;
+        }).join('<br>');
+    };
+
+    const updateOverlay = (data) => {
+        originalIP = data.ip;
+        const currentTime = new Date(data.time_zone?.current_time).toLocaleTimeString('es-MX', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+
+        contentDiv.innerHTML = `
+            🔥 <b>IP:</b> ${isCensored ? '***.***.***.***' : data.ip}<br>
+            🌍 <b>País:</b> ${data.country_name} (${data.country_code}) ${data.country_flag_emoji || ''}<br>
+            🧭 <b>Región:</b> ${data.state_prov}<br>
+            🏙️ <b>Ciudad:</b> ${data.city}<br>
+            🌐 <b>Continente:</b> ${data.continent_name}<br>
+            📍 <b>Lat/Lon:</b> ${data.latitude}, ${data.longitude}<br>
+            🛰️ <b>ISP:</b> ${data.isp}<br>
+            🧬 <b>Org:</b> ${data.organization}<br>
+            ⏰ <b>Hora Local:</b> ${currentTime}<br>
+            💸 <b>Moneda:</b> ${data.currency?.name || 'N/A'} (${data.currency?.code || ''})
+        `;
+
+        saveToHistory({
+            ip: data.ip,
+            country: data.country_name,
+            city: data.city,
+            flag: data.country_flag_emoji || ''
+        });
+    };
 
     const showError = (msg) => {
         contentDiv.innerText = `❌ Error detectado:\n${msg}`;
@@ -131,8 +167,6 @@
             showError("No fue posible obtener info:\n" + e.message);
         }
     };
-
-    let lastIP = null;
 
     const handleCandidate = (candidate) => {
         try {
@@ -166,7 +200,7 @@
         return pc;
     };
 
-    // Mover el overlay
+    // Drag funcionality
     let isDragging = false;
     let offsetX, offsetY;
 
@@ -190,5 +224,5 @@
         document.body.style.userSelect = '';
     });
 
-    console.log("✅ HUD IP activo");
+    console.log("✅ HUD IP activo con historial 📜");
 })();
