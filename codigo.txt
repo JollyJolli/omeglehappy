@@ -19,51 +19,70 @@
         position: 'fixed',
         top: '20px',
         left: '20px',
-        width: '340px',
-        background: '#111',
-        color: '#eee',
-        fontFamily: 'Arial, sans-serif',
-        borderRadius: '12px',
-        boxShadow: '0 10px 25px rgba(0,0,0,0.6)',
+        width: '320px',
+        background: '#1a1a1a',
+        color: '#fff',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        borderRadius: '16px',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
         overflow: 'hidden',
         zIndex: '999999',
         userSelect: 'none',
-        cursor: 'move'
+        cursor: 'move',
+        transition: 'all 0.3s ease'
     });
 
     const styles = `
         .overlay-header {
-            background: #1e1e1e;
-            padding: 10px 12px;
+            background: #222;
+            padding: 12px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: grab;
+            border-bottom: 1px solid #333;
         }
         .overlay-title {
-            font-weight: bold;
+            font-weight: 600;
             font-size: 14px;
-            color: #0f0;
+            color: #00ff9d;
+            letter-spacing: 0.5px;
         }
         .overlay-controls button {
             background: none;
             border: none;
-            color: #0f0;
+            color: #00ff9d;
             font-size: 14px;
             cursor: pointer;
-            margin-left: 6px;
+            margin-left: 8px;
+            padding: 4px;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+        .overlay-controls button:hover {
+            background: rgba(0, 255, 157, 0.1);
         }
         .ip-content {
-            padding: 12px;
+            padding: 16px;
             font-size: 13px;
-            line-height: 1.4;
+            line-height: 1.6;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+        .ip-content.hidden {
+            opacity: 0;
+        }
+        .ip-content b {
+            color: #00ff9d;
+            font-weight: 500;
         }
         .overlay-footer {
-            padding: 6px 12px;
+            padding: 8px 16px;
             font-size: 11px;
-            color: #777;
-            background: #1a1a1a;
+            color: #666;
+            background: #222;
             text-align: center;
+            border-top: 1px solid #333;
         }
     `;
     const styleTag = document.createElement('style');
@@ -83,9 +102,10 @@
     let lastIP = null;
 
     toggleBtn.onclick = () => {
-        const isHidden = contentDiv.style.display === 'none';
-        contentDiv.style.display = isHidden ? 'block' : 'none';
+        const isHidden = contentDiv.classList.contains('hidden');
+        contentDiv.classList.toggle('hidden');
         toggleBtn.innerText = isHidden ? '–' : '+';
+        contentDiv.style.display = 'block';
     };
 
     historyBtn.onclick = () => {
@@ -131,18 +151,126 @@
             second: '2-digit'
         });
 
+        const infoGroups = [
+            {
+                icon: '🔥',
+                label: 'IP',
+                value: isCensored ? '***.***.***.***' : data.ip,
+                class: 'primary'
+            },
+            {
+                icon: '🌍',
+                label: 'País',
+                value: `${data.country_name} ${data.country_flag_emoji || ''}`
+            },
+            {
+                icon: '🏙️',
+                label: 'Ciudad',
+                value: `${data.city}, ${data.state_prov}`
+            },
+            {
+                icon: '🌐',
+                label: 'Continente',
+                value: data.continent_name
+            },
+            {
+                icon: '📍',
+                label: 'Coordenadas',
+                value: `${data.latitude}, ${data.longitude}`,
+                class: 'coords'
+            },
+            {
+                icon: '🛰️',
+                label: 'ISP',
+                value: data.isp
+            },
+            {
+                icon: '⏰',
+                label: 'Hora Local',
+                value: currentTime,
+                class: 'time'
+            }
+        ];
+
         contentDiv.innerHTML = `
-            🔥 <b>IP:</b> ${isCensored ? '***.***.***.***' : data.ip}<br>
-            🌍 <b>País:</b> ${data.country_name} (${data.country_code}) ${data.country_flag_emoji || ''}<br>
-            🧭 <b>Región:</b> ${data.state_prov}<br>
-            🏙️ <b>Ciudad:</b> ${data.city}<br>
-            🌐 <b>Continente:</b> ${data.continent_name}<br>
-            📍 <b>Lat/Lon:</b> ${data.latitude}, ${data.longitude}<br>
-            🛰️ <b>ISP:</b> ${data.isp}<br>
-            🧬 <b>Org:</b> ${data.organization}<br>
-            ⏰ <b>Hora Local:</b> ${currentTime}<br>
-            💸 <b>Moneda:</b> ${data.currency?.name || 'N/A'} (${data.currency?.code || ''})
+            <div class="info-container">
+                ${infoGroups.map(group => `
+                    <div class="info-item ${group.class || ''}">
+                        <div class="info-icon">${group.icon}</div>
+                        <div class="info-content">
+                            <div class="info-label">${group.label}</div>
+                            <div class="info-value">${group.value}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
         `;
+
+        // Añadir estilos dinámicos para la nueva estructura
+        if (!document.querySelector('#dynamic-styles')) {
+            const dynamicStyles = document.createElement('style');
+            dynamicStyles.id = 'dynamic-styles';
+            dynamicStyles.innerHTML = `
+                .info-container {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                    gap: 12px;
+                    animation: fadeIn 0.3s ease;
+                }
+                .info-item {
+                    display: flex;
+                    align-items: flex-start;
+                    padding: 8px;
+                    border-radius: 8px;
+                    background: rgba(255,255,255,0.03);
+                    transition: transform 0.2s ease, background 0.2s ease;
+                }
+                .info-item:hover {
+                    transform: translateY(-2px);
+                    background: rgba(255,255,255,0.05);
+                }
+                .info-icon {
+                    font-size: 16px;
+                    margin-right: 8px;
+                    opacity: 0.9;
+                }
+                .info-content {
+                    flex: 1;
+                }
+                .info-label {
+                    font-size: 11px;
+                    color: #00ff9d;
+                    margin-bottom: 2px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
+                .info-value {
+                    font-size: 13px;
+                    word-break: break-word;
+                }
+                .info-item.primary {
+                    grid-column: 1 / -1;
+                    background: rgba(0, 255, 157, 0.05);
+                }
+                .info-item.primary .info-value {
+                    font-size: 15px;
+                    font-weight: 500;
+                }
+                .info-item.coords .info-value {
+                    font-family: monospace;
+                    font-size: 12px;
+                }
+                .info-item.time .info-value {
+                    font-family: monospace;
+                    color: #00ff9d;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            `;
+            document.head.appendChild(dynamicStyles);
+        }
 
         saveToHistory({
             ip: data.ip,
