@@ -1,9 +1,10 @@
 (() => {
+    const programVersion = '2';
     const overlay = document.createElement('div');
     overlay.id = 'ip-overlay';
     overlay.innerHTML = `
         <div class="overlay-header">
-            <span class="overlay-title">🔍 IP Info</span>
+            <span class="overlay-title">🔍 OmegleHappy v${programVersion}</span>
             <div class="overlay-controls">
                 <button id="toggle-btn">–</button>
                 <button id="history-btn">📜</button>
@@ -33,6 +34,77 @@
     });
 
     const styles = `
+        .copy-notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 255, 157, 0.2);
+            color: #00ff9d;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 1000001;
+            animation: fadeInOut 2s ease;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, 20px); }
+            20% { opacity: 1; transform: translate(-50%, 0); }
+            80% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, -20px); }
+        }
+        .history-window {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a1a1a;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            width: 300px;
+            z-index: 1000000;
+            overflow: hidden;
+        }
+        .history-header {
+            background: #222;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+            color: #00ff9d;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .close-history {
+            background: none;
+            border: none;
+            color: #00ff9d;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+        .history-content {
+            padding: 16px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .history-item {
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .history-item:hover {
+            background: rgba(255,255,255,0.05);
+            transform: translateY(-2px);
+        }
+        .info-item {
+            cursor: pointer;
+        }
+
         .overlay-header {
             background: #222;
             padding: 12px 16px;
@@ -104,20 +176,43 @@
     toggleBtn.onclick = () => {
         const isHidden = contentDiv.classList.contains('hidden');
         contentDiv.classList.toggle('hidden');
+        historyDiv.style.display = 'none';
         toggleBtn.innerText = isHidden ? '–' : '+';
-        contentDiv.style.display = 'block';
+        if (isHidden) {
+            overlay.style.width = '320px';
+            overlay.style.height = 'auto';
+            contentDiv.style.display = 'block';
+        } else {
+            overlay.style.width = '40px';
+            overlay.style.height = '40px';
+            contentDiv.style.display = 'none';
+        }
     };
 
     historyBtn.onclick = () => {
-        const isVisible = historyDiv.style.display === 'block';
-        if (!isVisible) renderHistory();
-        historyDiv.style.display = isVisible ? 'none' : 'block';
+        const historyWindow = document.createElement('div');
+        historyWindow.className = 'history-window';
+        historyWindow.innerHTML = `
+            <div class="history-header">
+                <span>📜 Historial</span>
+                <button class="close-history">×</button>
+            </div>
+            <div class="history-content"></div>
+        `;
+        document.body.appendChild(historyWindow);
+        
+        const closeBtn = historyWindow.querySelector('.close-history');
+        closeBtn.onclick = () => historyWindow.remove();
+        
+        renderHistory(historyWindow.querySelector('.history-content'));
     };
 
     censorBtn.onclick = () => {
         isCensored = !isCensored;
         if (isCensored) {
-            contentDiv.innerHTML = contentDiv.innerHTML.replace(originalIP, '***.***.***.***');
+            contentDiv.innerHTML = contentDiv.innerHTML
+                .replace(originalIP, '***.***.***.***')
+                .replace(/\d+\.\d+,\s*\d+\.\d+/g, '***.***, ***.**');
             censorBtn.innerText = '🙈';
         } else {
             fetchIPInfo(lastIP);
@@ -127,20 +222,28 @@
 
     const saveToHistory = (entry) => {
         let history = JSON.parse(localStorage.getItem('ipHistory') || '[]');
-        history.unshift(entry); // Añade al principio
-        if (history.length > 10) history = history.slice(0, 10); // Solo 10
+        history.unshift(entry);
+        if (history.length > 5) history = history.slice(0, 5); // Solo 5 entradas
         localStorage.setItem('ipHistory', JSON.stringify(history));
     };
 
-    const renderHistory = () => {
+    const renderHistory = (container) => {
         let history = JSON.parse(localStorage.getItem('ipHistory') || '[]');
         if (!history.length) {
-            historyDiv.innerHTML = '📭 Sin historial todavía.';
+            container.innerHTML = '📭 Sin historial todavía.';
             return;
         }
-        historyDiv.innerHTML = '<b>📜 Historial:</b><br><br>' + history.map((h, i) => {
-            return `${i + 1}.- ${h.flag || ''} ${h.country} - ${h.city} - ${h.ip}`;
-        }).join('<br>');
+        container.innerHTML = history.map((h, i) => {
+            return `<div class="history-item">${h.flag || ''} ${h.country} - ${h.city} - ${h.ip}</div>`;
+        }).join('');
+    };
+
+    const copyToClipboard = async (text) => {
+        try {
+            await navigator.clipboard.writeText(text);
+        } catch (err) {
+            console.error('Error al copiar:', err);
+        }
     };
 
     const updateOverlay = (data) => {
@@ -150,6 +253,17 @@
             minute: '2-digit',
             second: '2-digit'
         });
+
+        const handleInfoClick = (value, label) => {
+            if (!isCensored) {
+                copyToClipboard(value);
+                const notification = document.createElement('div');
+                notification.className = 'copy-notification';
+                notification.textContent = `✓ ${label} copiado`;
+                document.body.appendChild(notification);
+                setTimeout(() => notification.remove(), 2000);
+            }
+        };
 
         const infoGroups = [
             {
@@ -195,7 +309,7 @@
         contentDiv.innerHTML = `
             <div class="info-container">
                 ${infoGroups.map(group => `
-                    <div class="info-item ${group.class || ''}">
+                    <div class="info-item ${group.class || ''}" onclick="(${handleInfoClick.toString()})('${group.value.replace(/'/g, "\'")}, '${group.label}')">
                         <div class="info-icon">${group.icon}</div>
                         <div class="info-content">
                             <div class="info-label">${group.label}</div>
