@@ -1,6 +1,6 @@
 # 🔍 OmegleHappy v1.0
 
-| Language | Flag |
+| Language | Docs |
 |----------|------|
 | Español 🇪🇸 | [README.md](README.md) |
 | English 🇬🇧 | [README.en.md](READMEs/README.en.md) |
