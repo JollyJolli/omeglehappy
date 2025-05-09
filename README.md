@@ -1,4 +1,4 @@
-# 🔍 OmegleHappy v1.0
+# 🔍 OmegleHappy v3.0
 
 | Language | Docs |
 |----------|------|
