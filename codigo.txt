@@ -1,5 +1,5 @@
 (() => {
-    const programVersion = '2';
+    const programVersion = '2.1';
     const overlay = document.createElement('div');
     overlay.id = 'ip-overlay';
     overlay.innerHTML = `
