@@ -248,12 +248,13 @@
 
     const updateOverlay = (data) => {
         originalIP = data.ip;
-        const currentTime = new Date(data.time_zone?.current_time).toLocaleTimeString('es-MX', {
+        const currentTime = new Date().toLocaleString('es-MX', {
+            timeZone: data.time_zone.name,
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit'
         });
-
+    
         const handleInfoClick = (value, label) => {
             if (!isCensored) {
                 copyToClipboard(value);
@@ -264,7 +265,7 @@
                 setTimeout(() => notification.remove(), 2000);
             }
         };
-
+    
         const infoGroups = [
             {
                 icon: '🔥',
@@ -288,13 +289,13 @@
                 value: data.continent_name
             },
             {
-                icon: '📍',
+                icon: '�',
                 label: 'Coordenadas',
                 value: `${data.latitude}, ${data.longitude}`,
                 class: 'coords'
             },
             {
-                icon: '🛰️',
+                icon: '�️',
                 label: 'ISP',
                 value: data.isp
             },
@@ -305,11 +306,11 @@
                 class: 'time'
             }
         ];
-
+    
         contentDiv.innerHTML = `
             <div class="info-container">
                 ${infoGroups.map(group => `
-                    <div class="info-item ${group.class || ''}" onclick="(${handleInfoClick.toString()})('${group.value.replace(/'/g, "\'")}, '${group.label}')">
+                    <div class="info-item ${group.class || ''}" onclick="(${handleInfoClick.toString()})('${group.value.replace(/'/g, "\'")}', '${group.label}')">
                         <div class="info-icon">${group.icon}</div>
                         <div class="info-content">
                             <div class="info-label">${group.label}</div>
@@ -319,7 +320,7 @@
                 `).join('')}
             </div>
         `;
-
+    
         // Añadir estilos dinámicos para la nueva estructura
         if (!document.querySelector('#dynamic-styles')) {
             const dynamicStyles = document.createElement('style');
@@ -385,7 +386,7 @@
             `;
             document.head.appendChild(dynamicStyles);
         }
-
+    
         saveToHistory({
             ip: data.ip,
             country: data.country_name,
