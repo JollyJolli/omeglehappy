@@ -1,4 +1,4 @@
-# 🔍 OmegleHappy v1.0
+# 🔍 OmegleHappy v3.0
 
 ## 📋 Beschreibung
 OmegleHappy ist ein Tool, mit dem Sie detaillierte Informationen über die IPs der Personen einsehen können, mit denen Sie sich auf Ome.tv verbinden, einschließlich ihres Standorts, ihrer Zeitzone und mehr.
@@ -27,10 +27,21 @@ fetch("https://raw.githubusercontent.com/JollyJolli/omeglehappy/refs/heads/main/
 - 🙈 Zensur-Button: Versteckt/zeigt aktuelle IP
 - – Minimieren-Button: Verkleinert/erweitert das Informationsfenster
 
+## 📌 Alternative Methode (Lesezeichen)
+1. Erstellen Sie ein neues Lesezeichen in Ihrem Browser
+2. Setzen Sie "OmegleHappy" als Namen
+3. Kopieren Sie als URL den folgenden Code:
+```javascript
+javascript:fetch("https://raw.githubusercontent.com/JollyJolli/omeglehappy/refs/heads/main/codigo.txt").then(r=>r.text()).then(c=>eval(c))
+```
+4. Gehen Sie zu [Ome.tv](https://ome.tv)
+5. Klicken Sie auf das Lesezeichen, um OmegleHappy zu aktivieren
+
 ## ⚠️ Hinweise
 - Das Tool funktioniert nur, während die Ome.tv-Seite geöffnet ist
 - Der Verlauf wird lokal in Ihrem Browser gespeichert
 - Verwenden Sie dieses Tool verantwortungsvoll und ethisch
+- Die Lesezeichen-Methode ist eine schnellere Möglichkeit, das Tool zu aktivieren
 
 ## 👨‍💻 Erstellt von
-Entwickelt mit 💻 von Jolly
+Gemacht mit 💻 von Jolly

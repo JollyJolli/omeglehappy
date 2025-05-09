@@ -1,4 +1,4 @@
-# 🔍 OmegleHappy v1.0
+# 🔍 OmegleHappy v3.0
 
 ## 📋 Description
 OmegleHappy is a tool that allows you to view detailed information about the IPs of people you connect with on Ome.tv, including their location, time zone, and more.
@@ -28,7 +28,7 @@ fetch("https://raw.githubusercontent.com/JollyJolli/omeglehappy/refs/heads/main/
 - – Minimize Button: Collapse/expand information window
 
 ## ⚠️ Notes
-- The tool only works while keeping the Ome.tv page open
+- The tool only works while you keep the Ome.tv page open
 - History is saved locally in your browser
 - Use this tool responsibly and ethically
 
