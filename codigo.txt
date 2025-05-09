@@ -268,10 +268,9 @@
     
         const infoGroups = [
             {
-                icon: '🔥',
-                label: 'IP',
-                value: isCensored ? '***.***.***.***' : data.ip,
-                class: 'primary'
+                icon: '🏙️',
+                label: 'Ciudad',
+                value: `${data.city}, ${data.state_prov}`
             },
             {
                 icon: '🌍',
@@ -279,9 +278,10 @@
                 value: `${data.country_name} ${data.country_flag_emoji || ''}`
             },
             {
-                icon: '🏙️',
-                label: 'Ciudad',
-                value: `${data.city}, ${data.state_prov}`
+                icon: '🔥',
+                label: 'IP',
+                value: isCensored ? '***.***.***.***' : data.ip,
+                class: 'primary'
             },
             {
                 icon: '🌐',
@@ -402,7 +402,7 @@
 
     const fetchIPInfo = async (ip) => {
         try {
-            const res = await fetch(`https://api.ipgeolocation.io/ipgeo?apiKey=c9cf4f25c80f4732adb70fcb02c53338&ip=${ip}`);
+            const res = await fetch(`https://api.ipgeolocation.io/ipgeo?apiKey=7adc7b2623c64ebda389cbb388a0aaea&ip=${ip}`);
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const json = await res.json();
             updateOverlay(json);
