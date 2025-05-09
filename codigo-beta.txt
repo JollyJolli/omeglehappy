@@ -1,7 +1,12 @@
 (() => {
-    const programVersion = '2.3';
+    const programVersion = '2.4';
     const THEME_KEY = 'omegle_happy_theme';
     const POSITION_KEY = 'omegle_happy_position';
+    const API_KEYS = [
+        '1e761879cafa42e6aa93f3b682612acf',
+        '7adc7b2623c64ebda389cbb388a0aaea'
+    ];
+    let currentKeyIndex = 0;
     
     // Sistema de temas y configuración
     const themes = {
@@ -165,6 +170,43 @@
         }
         .info-item {
             cursor: pointer;
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--theme-border);
+            border-top-color: var(--theme-accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        .loading-text {
+            color: var(--theme-accent);
+            font-size: 14px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .connection-time {
+            font-size: 12px;
+            color: var(--theme-secondary);
+            font-family: monospace;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         .overlay-header {
@@ -462,14 +504,65 @@
         overlay.style.color = '#ff4d4d';
     };
 
+    const getNextApiKey = () => {
+        currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length;
+        return API_KEYS[currentKeyIndex];
+    };
+
     const fetchIPInfo = async (ip) => {
-        try {
-            const res = await fetch(`https://api.ipgeolocation.io/ipgeo?apiKey=7adc7b2623c64ebda389cbb388a0aaea&ip=${ip}`);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const json = await res.json();
-            updateOverlay(json);
+        let attempts = 0;
+        const maxAttempts = API_KEYS.length;
+
+        while (attempts < maxAttempts) {
+            try {
+                const currentKey = API_KEYS[currentKeyIndex];
+                const res = await fetch(`https://api.ipgeolocation.io/ipgeo?apiKey=${currentKey}&ip=${ip}`);
+                
+                if (res.ok) {
+                    const json = await res.json();
+                    updateOverlay(json);
+                    return;
+                } else if (res.status === 403 || res.status === 429) {
+                    // Si la key está agotada o inválida, intentamos con la siguiente
+                    currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length;
+                } else {
+                    throw new Error(`HTTP ${res.status}`);
+                }
+            } catch (e) {
+                attempts++;
+                if (attempts === maxAttempts) {
+                    showError("No fue posible obtener info después de intentar con todas las API keys");
+                    return;
+                }
+                currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length;
+            }
+        }
         } catch (e) {
             showError("No fue posible obtener info:\n" + e.message);
+        }
+    };
+
+    let connectionStartTime = null;
+    let loadingStates = [
+        '🔄 Estableciendo conexión segura...',
+        '📡 Analizando red...',
+        '🌐 Detectando ubicación...',
+        '📊 Recopilando datos...',
+        '🔒 Verificando conexión...'
+    ];
+    let currentLoadingState = 0;
+    let loadingInterval = null;
+
+    const updateLoadingState = () => {
+        if (contentDiv) {
+            contentDiv.innerHTML = `
+                <div class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">${loadingStates[currentLoadingState]}</div>
+                    <div class="connection-time">Tiempo de conexión: ${Math.floor((Date.now() - connectionStartTime) / 1000)}s</div>
+                </div>
+            `;
+            currentLoadingState = (currentLoadingState + 1) % loadingStates.length;
         }
     };
 
@@ -480,7 +573,21 @@
             const type = parts[7];
             if (type === 'srflx' && ip !== lastIP) {
                 lastIP = ip;
-                fetchIPInfo(ip);
+                connectionStartTime = Date.now();
+                
+                // Iniciar animación de carga
+                if (loadingInterval) clearInterval(loadingInterval);
+                loadingInterval = setInterval(updateLoadingState, 800);
+                updateLoadingState();
+
+                // Esperar 5 segundos antes de hacer la solicitud
+                setTimeout(() => {
+                    if (loadingInterval) {
+                        clearInterval(loadingInterval);
+                        loadingInterval = null;
+                    }
+                    fetchIPInfo(ip);
+                }, 5000);
             }
         } catch (e) {
             showError("Error ICE:\n" + e.message);
