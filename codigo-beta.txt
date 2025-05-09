@@ -1,7 +1,139 @@
 (() => {
-    const programVersion = '2.4';
+    const programVersion = '2.5';
     const THEME_KEY = 'omegle_happy_theme';
     const POSITION_KEY = 'omegle_happy_position';
+    const LANG_KEY = 'omegle_happy_lang';
+    
+    // Sistema de idiomas
+    const translations = {
+        es: {
+            minimize: 'Minimizar/Maximizar',
+            history: 'Ver historial',
+            censor: 'Ocultar información sensible',
+            theme: 'Cambiar tema',
+            language: 'Cambiar idioma',
+            madeBy: 'Hecho con 💻 por Jolly',
+            noHistory: '📭 Sin historial todavía.',
+            historyTitle: '📜 Historial',
+            copied: '✓ {label} copiado',
+            city: 'Ciudad',
+            country: 'País',
+            ip: 'IP',
+            continent: 'Continente',
+            coords: 'Coordenadas',
+            isp: 'ISP',
+            localTime: 'Hora Local',
+            connecting: '🔄 Estableciendo conexión segura...',
+            analyzing: '📡 Analizando red...',
+            detecting: '🌐 Detectando ubicación...',
+            collecting: '📊 Recopilando datos...',
+            verifying: '🔒 Verificando conexión...',
+            connectionTime: 'Tiempo de conexión: {time}s',
+            error: 'Error detectado:'
+        },
+        en: {
+            minimize: 'Minimize/Maximize',
+            history: 'View history',
+            censor: 'Hide sensitive information',
+            theme: 'Change theme',
+            language: 'Change language',
+            madeBy: 'Made with 💻 by Jolly',
+            noHistory: '📭 No history yet.',
+            historyTitle: '📜 History',
+            copied: '✓ {label} copied',
+            city: 'City',
+            country: 'Country',
+            ip: 'IP',
+            continent: 'Continent',
+            coords: 'Coordinates',
+            isp: 'ISP',
+            localTime: 'Local Time',
+            connecting: '🔄 Establishing secure connection...',
+            analyzing: '📡 Analyzing network...',
+            detecting: '🌐 Detecting location...',
+            collecting: '📊 Collecting data...',
+            verifying: '🔒 Verifying connection...',
+            connectionTime: 'Connection time: {time}s',
+            error: 'Error detected:'
+        },
+        pt: {
+            minimize: 'Minimizar/Maximizar',
+            history: 'Ver histórico',
+            censor: 'Ocultar informação sensível',
+            theme: 'Mudar tema',
+            language: 'Mudar idioma',
+            madeBy: 'Feito com 💻 por Jolly',
+            noHistory: '📭 Sem histórico ainda.',
+            historyTitle: '📜 Histórico',
+            copied: '✓ {label} copiado',
+            city: 'Cidade',
+            country: 'País',
+            ip: 'IP',
+            continent: 'Continente',
+            coords: 'Coordenadas',
+            isp: 'ISP',
+            localTime: 'Hora Local',
+            connecting: '🔄 Estabelecendo conexão segura...',
+            analyzing: '📡 Analisando rede...',
+            detecting: '🌐 Detectando localização...',
+            collecting: '📊 Coletando dados...',
+            verifying: '🔒 Verificando conexão...',
+            connectionTime: 'Tempo de conexão: {time}s',
+            error: 'Erro detectado:'
+        },
+        fr: {
+            minimize: 'Réduire/Agrandir',
+            history: 'Voir l\'historique',
+            censor: 'Masquer les informations sensibles',
+            theme: 'Changer le thème',
+            language: 'Changer la langue',
+            madeBy: 'Fait avec 💻 par Jolly',
+            noHistory: '📭 Pas encore d\'historique.',
+            historyTitle: '📜 Historique',
+            copied: '✓ {label} copié',
+            city: 'Ville',
+            country: 'Pays',
+            ip: 'IP',
+            continent: 'Continent',
+            coords: 'Coordonnées',
+            isp: 'FAI',
+            localTime: 'Heure locale',
+            connecting: '🔄 Établissement d\'une connexion sécurisée...',
+            analyzing: '📡 Analyse du réseau...',
+            detecting: '🌐 Détection de la localisation...',
+            collecting: '📊 Collecte des données...',
+            verifying: '🔒 Vérification de la connexion...',
+            connectionTime: 'Temps de connexion : {time}s',
+            error: 'Erreur détectée :'
+        },
+        de: {
+            minimize: 'Minimieren/Maximieren',
+            history: 'Verlauf anzeigen',
+            censor: 'Sensible Informationen ausblenden',
+            theme: 'Theme ändern',
+            language: 'Sprache ändern',
+            madeBy: 'Erstellt mit 💻 von Jolly',
+            noHistory: '📭 Noch kein Verlauf.',
+            historyTitle: '📜 Verlauf',
+            copied: '✓ {label} kopiert',
+            city: 'Stadt',
+            country: 'Land',
+            ip: 'IP',
+            continent: 'Kontinent',
+            coords: 'Koordinaten',
+            isp: 'ISP',
+            localTime: 'Ortszeit',
+            connecting: '🔄 Sichere Verbindung wird hergestellt...',
+            analyzing: '📡 Netzwerk wird analysiert...',
+            detecting: '🌐 Standort wird erkannt...',
+            collecting: '📊 Daten werden gesammelt...',
+            verifying: '🔒 Verbindung wird überprüft...',
+            connectionTime: 'Verbindungszeit: {time}s',
+            error: 'Fehler erkannt:'
+        }
+    };
+    
+    let currentLang = localStorage.getItem(LANG_KEY) || 'es';
     const API_KEYS = [
         '1e761879cafa42e6aa93f3b682612acf',
         '7adc7b2623c64ebda389cbb388a0aaea'
@@ -32,20 +164,27 @@
     let savedPosition = JSON.parse(localStorage.getItem(POSITION_KEY) || '{ "top": "20px", "left": "20px" }');
     const overlay = document.createElement('div');
     overlay.id = 'ip-overlay';
-    overlay.innerHTML = `
-        <div class="overlay-header">
-            <span class="overlay-title">🔍 OmegleHappy v${programVersion}</span>
-            <div class="overlay-controls">
-                <button id="toggle-btn" title="Minimizar/Maximizar">–</button>
-                <button id="history-btn" title="Ver historial">📜</button>
-                <button id="censor-btn" title="Ocultar información sensible">🙈</button>
-                <button id="theme-btn" title="Cambiar tema">🎨</button>
+    const t = (key) => translations[currentLang][key] || translations['en'][key];
+
+    const updateInterface = () => {
+        overlay.innerHTML = `
+            <div class="overlay-header">
+                <span class="overlay-title">🔍 OmegleHappy v${programVersion}</span>
+                <div class="overlay-controls">
+                    <button id="toggle-btn" title="${t('minimize')}">–</button>
+                    <button id="history-btn" title="${t('history')}">📜</button>
+                    <button id="censor-btn" title="${t('censor')}">🙈</button>
+                    <button id="theme-btn" title="${t('theme')}">🎨</button>
+                    <button id="lang-btn" title="${t('language')}">🌐</button>
+                </div>
             </div>
-        </div>
-        <div class="ip-content"></div>
-        <div class="ip-history" style="display:none; padding: 12px; font-size: 12px; color: #ccc;"></div>
-        <div class="overlay-footer">Hecho con 💻 por Jolly</div>
-    `;
+            <div class="ip-content"></div>
+            <div class="ip-history" style="display:none; padding: 12px; font-size: 12px; color: #ccc;"></div>
+            <div class="overlay-footer">${t('madeBy')}</div>
+        `;
+    };
+
+    updateInterface();
 
     const applyTheme = (themeName) => {
         const theme = themes[themeName];
@@ -267,38 +406,58 @@
 
     document.body.appendChild(overlay);
 
-    const toggleBtn = overlay.querySelector('#toggle-btn');
-    const censorBtn = overlay.querySelector('#censor-btn');
-    const historyBtn = overlay.querySelector('#history-btn');
-    const contentDiv = overlay.querySelector('.ip-content');
-    const historyDiv = overlay.querySelector('.ip-history');
+    const initializeControls = () => {
+        const toggleBtn = overlay.querySelector('#toggle-btn');
+        const censorBtn = overlay.querySelector('#censor-btn');
+        const historyBtn = overlay.querySelector('#history-btn');
+        const themeBtn = overlay.querySelector('#theme-btn');
+        const langBtn = overlay.querySelector('#lang-btn');
+        const contentDiv = overlay.querySelector('.ip-content');
+        const historyDiv = overlay.querySelector('.ip-history');
+
+        let isCensored = false;
+        let originalIP = '';
+        let lastIP = null;
+
+        toggleBtn.onclick = () => {
+            const isHidden = contentDiv.classList.contains('hidden');
+            contentDiv.classList.toggle('hidden');
+            historyDiv.style.display = 'none';
+            toggleBtn.innerText = isHidden ? '–' : '+';
+            if (isHidden) {
+                overlay.style.width = '320px';
+                overlay.style.height = 'auto';
+                contentDiv.style.display = 'block';
+            } else {
+                overlay.style.width = '40px';
+                overlay.style.height = '40px';
+                contentDiv.style.display = 'none';
+            }
+        };
+
+        langBtn.onclick = () => {
+            const languages = ['es', 'en', 'pt', 'fr', 'de'];
+            const currentIndex = languages.indexOf(currentLang);
+            currentLang = languages[(currentIndex + 1) % languages.length];
+            localStorage.setItem(LANG_KEY, currentLang);
+            updateInterface();
+            initializeControls();
+            if (lastIP) fetchIPInfo(lastIP);
+        };
+    };
+
+    initializeControls();
 
     let isCensored = false;
     let originalIP = '';
     let lastIP = null;
-
-    toggleBtn.onclick = () => {
-        const isHidden = contentDiv.classList.contains('hidden');
-        contentDiv.classList.toggle('hidden');
-        historyDiv.style.display = 'none';
-        toggleBtn.innerText = isHidden ? '–' : '+';
-        if (isHidden) {
-            overlay.style.width = '320px';
-            overlay.style.height = 'auto';
-            contentDiv.style.display = 'block';
-        } else {
-            overlay.style.width = '40px';
-            overlay.style.height = '40px';
-            contentDiv.style.display = 'none';
-        }
-    };
 
     historyBtn.onclick = () => {
         const historyWindow = document.createElement('div');
         historyWindow.className = 'history-window';
         historyWindow.innerHTML = `
             <div class="history-header">
-                <span>📜 Historial</span>
+                <span>${t('historyTitle')}</span>
                 <button class="close-history">×</button>
             </div>
             <div class="history-content"></div>
@@ -327,14 +486,14 @@
     const saveToHistory = (entry) => {
         let history = JSON.parse(localStorage.getItem('ipHistory') || '[]');
         history.unshift(entry);
-        if (history.length > 5) history = history.slice(0, 5); // Solo 5 entradas
+        if (history.length > 5) history = history.slice(0, 5);
         localStorage.setItem('ipHistory', JSON.stringify(history));
     };
 
     const renderHistory = (container) => {
         let history = JSON.parse(localStorage.getItem('ipHistory') || '[]');
         if (!history.length) {
-            container.innerHTML = '📭 Sin historial todavía.';
+            container.innerHTML = t('noHistory');
             return;
         }
         container.innerHTML = history.map((h, i) => {
@@ -352,7 +511,7 @@
 
     const updateOverlay = (data) => {
         originalIP = data.ip;
-        const currentTime = new Date().toLocaleString('es-MX', {
+        const currentTime = new Date().toLocaleString(currentLang, {
             timeZone: data.time_zone.name,
             hour: '2-digit',
             minute: '2-digit',
@@ -364,7 +523,7 @@
                 copyToClipboard(value);
                 const notification = document.createElement('div');
                 notification.className = 'copy-notification';
-                notification.textContent = `✓ ${label} copiado`;
+                notification.textContent = t('copied').replace('{label}', label);
                 document.body.appendChild(notification);
                 setTimeout(() => notification.remove(), 2000);
             }
@@ -373,39 +532,39 @@
         const infoGroups = [
             {
                 icon: '🏙️',
-                label: 'Ciudad',
+                label: t('city'),
                 value: `${data.city}, ${data.state_prov}`
             },
             {
                 icon: '🌍',
-                label: 'País',
+                label: t('country'),
                 value: `${data.country_name} ${data.country_flag_emoji || ''}`
             },
             {
                 icon: '🔥',
-                label: 'IP',
+                label: t('ip'),
                 value: isCensored ? '***.***.***.***' : data.ip,
                 class: 'primary'
             },
             {
                 icon: '🌐',
-                label: 'Continente',
+                label: t('continent'),
                 value: data.continent_name
             },
             {
-                icon: '�',
-                label: 'Coordenadas',
+                icon: '📍',
+                label: t('coords'),
                 value: `${data.latitude}, ${data.longitude}`,
                 class: 'coords'
             },
             {
-                icon: '�️',
-                label: 'ISP',
+                icon: '🌐',
+                label: t('isp'),
                 value: data.isp
             },
             {
                 icon: '⏰',
-                label: 'Hora Local',
+                label: t('localTime'),
                 value: currentTime,
                 class: 'time'
             }
@@ -543,13 +702,7 @@
     };
 
     let connectionStartTime = null;
-    let loadingStates = [
-        '🔄 Estableciendo conexión segura...',
-        '📡 Analizando red...',
-        '🌐 Detectando ubicación...',
-        '📊 Recopilando datos...',
-        '🔒 Verificando conexión...'
-    ];
+    let loadingStates = ['connecting', 'analyzing', 'detecting', 'collecting', 'verifying'];
     let currentLoadingState = 0;
     let loadingInterval = null;
 
@@ -558,8 +711,8 @@
             contentDiv.innerHTML = `
                 <div class="loading-container">
                     <div class="loading-spinner"></div>
-                    <div class="loading-text">${loadingStates[currentLoadingState]}</div>
-                    <div class="connection-time">Tiempo de conexión: ${Math.floor((Date.now() - connectionStartTime) / 1000)}s</div>
+                    <div class="loading-text">${t(loadingStates[currentLoadingState])}</div>
+                    <div class="connection-time">${t('connectionTime').replace('{time}', Math.floor((Date.now() - connectionStartTime) / 1000))}</div>
                 </div>
             `;
             currentLoadingState = (currentLoadingState + 1) % loadingStates.length;
