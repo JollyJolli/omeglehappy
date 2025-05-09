@@ -1,5 +1,8 @@
 # 🔍 OmegleHappy v3.0
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/JollyJolli/omeglehappy)
+
+## 🌎 Languages
 | Language | Docs |
 |----------|------|
 | Español 🇪🇸 | [README.md](README.md) |
