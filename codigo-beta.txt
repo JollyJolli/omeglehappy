@@ -1,210 +1,28 @@
 (() => {
-    const programVersion = '2.5';
-    const THEME_KEY = 'omegle_happy_theme';
-    const POSITION_KEY = 'omegle_happy_position';
-    const LANG_KEY = 'omegle_happy_lang';
-    
-    // Sistema de idiomas
-    const translations = {
-        es: {
-            minimize: 'Minimizar/Maximizar',
-            history: 'Ver historial',
-            censor: 'Ocultar información sensible',
-            theme: 'Cambiar tema',
-            language: 'Cambiar idioma',
-            madeBy: 'Hecho con 💻 por Jolly',
-            noHistory: '📭 Sin historial todavía.',
-            historyTitle: '📜 Historial',
-            copied: '✓ {label} copiado',
-            city: 'Ciudad',
-            country: 'País',
-            ip: 'IP',
-            continent: 'Continente',
-            coords: 'Coordenadas',
-            isp: 'ISP',
-            localTime: 'Hora Local',
-            connecting: '🔄 Estableciendo conexión segura...',
-            analyzing: '📡 Analizando red...',
-            detecting: '🌐 Detectando ubicación...',
-            collecting: '📊 Recopilando datos...',
-            verifying: '🔒 Verificando conexión...',
-            connectionTime: 'Tiempo de conexión: {time}s',
-            error: 'Error detectado:'
-        },
-        en: {
-            minimize: 'Minimize/Maximize',
-            history: 'View history',
-            censor: 'Hide sensitive information',
-            theme: 'Change theme',
-            language: 'Change language',
-            madeBy: 'Made with 💻 by Jolly',
-            noHistory: '📭 No history yet.',
-            historyTitle: '📜 History',
-            copied: '✓ {label} copied',
-            city: 'City',
-            country: 'Country',
-            ip: 'IP',
-            continent: 'Continent',
-            coords: 'Coordinates',
-            isp: 'ISP',
-            localTime: 'Local Time',
-            connecting: '🔄 Establishing secure connection...',
-            analyzing: '📡 Analyzing network...',
-            detecting: '🌐 Detecting location...',
-            collecting: '📊 Collecting data...',
-            verifying: '🔒 Verifying connection...',
-            connectionTime: 'Connection time: {time}s',
-            error: 'Error detected:'
-        },
-        pt: {
-            minimize: 'Minimizar/Maximizar',
-            history: 'Ver histórico',
-            censor: 'Ocultar informação sensível',
-            theme: 'Mudar tema',
-            language: 'Mudar idioma',
-            madeBy: 'Feito com 💻 por Jolly',
-            noHistory: '📭 Sem histórico ainda.',
-            historyTitle: '📜 Histórico',
-            copied: '✓ {label} copiado',
-            city: 'Cidade',
-            country: 'País',
-            ip: 'IP',
-            continent: 'Continente',
-            coords: 'Coordenadas',
-            isp: 'ISP',
-            localTime: 'Hora Local',
-            connecting: '🔄 Estabelecendo conexão segura...',
-            analyzing: '📡 Analisando rede...',
-            detecting: '🌐 Detectando localização...',
-            collecting: '📊 Coletando dados...',
-            verifying: '🔒 Verificando conexão...',
-            connectionTime: 'Tempo de conexão: {time}s',
-            error: 'Erro detectado:'
-        },
-        fr: {
-            minimize: 'Réduire/Agrandir',
-            history: 'Voir l\'historique',
-            censor: 'Masquer les informations sensibles',
-            theme: 'Changer le thème',
-            language: 'Changer la langue',
-            madeBy: 'Fait avec 💻 par Jolly',
-            noHistory: '📭 Pas encore d\'historique.',
-            historyTitle: '📜 Historique',
-            copied: '✓ {label} copié',
-            city: 'Ville',
-            country: 'Pays',
-            ip: 'IP',
-            continent: 'Continent',
-            coords: 'Coordonnées',
-            isp: 'FAI',
-            localTime: 'Heure locale',
-            connecting: '🔄 Établissement d\'une connexion sécurisée...',
-            analyzing: '📡 Analyse du réseau...',
-            detecting: '🌐 Détection de la localisation...',
-            collecting: '📊 Collecte des données...',
-            verifying: '🔒 Vérification de la connexion...',
-            connectionTime: 'Temps de connexion : {time}s',
-            error: 'Erreur détectée :'
-        },
-        de: {
-            minimize: 'Minimieren/Maximieren',
-            history: 'Verlauf anzeigen',
-            censor: 'Sensible Informationen ausblenden',
-            theme: 'Theme ändern',
-            language: 'Sprache ändern',
-            madeBy: 'Erstellt mit 💻 von Jolly',
-            noHistory: '📭 Noch kein Verlauf.',
-            historyTitle: '📜 Verlauf',
-            copied: '✓ {label} kopiert',
-            city: 'Stadt',
-            country: 'Land',
-            ip: 'IP',
-            continent: 'Kontinent',
-            coords: 'Koordinaten',
-            isp: 'ISP',
-            localTime: 'Ortszeit',
-            connecting: '🔄 Sichere Verbindung wird hergestellt...',
-            analyzing: '📡 Netzwerk wird analysiert...',
-            detecting: '🌐 Standort wird erkannt...',
-            collecting: '📊 Daten werden gesammelt...',
-            verifying: '🔒 Verbindung wird überprüft...',
-            connectionTime: 'Verbindungszeit: {time}s',
-            error: 'Fehler erkannt:'
-        }
-    };
-    
-    let currentLang = localStorage.getItem(LANG_KEY) || 'es';
-    const API_KEYS = [
-        '1e761879cafa42e6aa93f3b682612acf',
-        '7adc7b2623c64ebda389cbb388a0aaea'
-    ];
-    let currentKeyIndex = 0;
-    
-    // Sistema de temas y configuración
-    const themes = {
-        dark: {
-            background: '#1a1a1a',
-            text: '#fff',
-            accent: '#00ff9d',
-            secondary: '#666',
-            border: '#333',
-            cardBg: 'rgba(255,255,255,0.03)'
-        },
-        light: {
-            background: '#ffffff',
-            text: '#333333',
-            accent: '#00b36b',
-            secondary: '#999',
-            border: '#e0e0e0',
-            cardBg: 'rgba(0,0,0,0.03)'
-        }
-    };
-    
-    let currentTheme = localStorage.getItem(THEME_KEY) || 'dark';
-    let savedPosition = JSON.parse(localStorage.getItem(POSITION_KEY) || '{ "top": "20px", "left": "20px" }');
+    const programVersion = '2.2';
     const overlay = document.createElement('div');
     overlay.id = 'ip-overlay';
-    const t = (key) => translations[currentLang][key] || translations['en'][key];
-
-    const updateInterface = () => {
-        overlay.innerHTML = `
-            <div class="overlay-header">
-                <span class="overlay-title">🔍 OmegleHappy v${programVersion}</span>
-                <div class="overlay-controls">
-                    <button id="toggle-btn" title="${t('minimize')}">–</button>
-                    <button id="history-btn" title="${t('history')}">📜</button>
-                    <button id="censor-btn" title="${t('censor')}">🙈</button>
-                    <button id="theme-btn" title="${t('theme')}">🎨</button>
-                    <button id="lang-btn" title="${t('language')}">🌐</button>
-                </div>
+    overlay.innerHTML = `
+        <div class="overlay-header">
+            <span class="overlay-title">🔍 OmegleHappy v${programVersion}</span>
+            <div class="overlay-controls">
+                <button id="toggle-btn">–</button>
+                <button id="history-btn">📜</button>
+                <button id="censor-btn">🙈</button>
             </div>
-            <div class="ip-content"></div>
-            <div class="ip-history" style="display:none; padding: 12px; font-size: 12px; color: #ccc;"></div>
-            <div class="overlay-footer">${t('madeBy')}</div>
-        `;
-    };
-
-    updateInterface();
-
-    const applyTheme = (themeName) => {
-        const theme = themes[themeName];
-        document.documentElement.style.setProperty('--theme-bg', theme.background);
-        document.documentElement.style.setProperty('--theme-text', theme.text);
-        document.documentElement.style.setProperty('--theme-accent', theme.accent);
-        document.documentElement.style.setProperty('--theme-secondary', theme.secondary);
-        document.documentElement.style.setProperty('--theme-border', theme.border);
-        document.documentElement.style.setProperty('--theme-card-bg', theme.cardBg);
-    };
-
-    applyTheme(currentTheme);
+        </div>
+        <div class="ip-content"></div>
+        <div class="ip-history" style="display:none; padding: 12px; font-size: 12px; color: #ccc;"></div>
+        <div class="overlay-footer">Hecho con 💻 por Jolly</div>
+    `;
 
     Object.assign(overlay.style, {
         position: 'fixed',
-        top: savedPosition.top,
-        left: savedPosition.left,
+        top: '20px',
+        left: '20px',
         width: '320px',
-        background: 'var(--theme-bg)',
-        color: 'var(--theme-text)',
+        background: '#1a1a1a',
+        color: '#fff',
         fontFamily: 'system-ui, -apple-system, sans-serif',
         borderRadius: '16px',
         boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
@@ -216,37 +34,13 @@
     });
 
     const styles = `
-        :root {
-            --theme-bg: #1a1a1a;
-            --theme-text: #fff;
-            --theme-accent: #00ff9d;
-            --theme-secondary: #666;
-            --theme-border: #333;
-            --theme-card-bg: rgba(255,255,255,0.03);
-        }
-
-        .tooltip {
-            position: absolute;
-            background: var(--theme-bg);
-            color: var(--theme-text);
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-            z-index: 1000002;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            border: 1px solid var(--theme-border);
-        }
-
         .copy-notification {
             position: fixed;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(var(--theme-accent-rgb), 0.2);
-            color: var(--theme-accent);
+            background: rgba(0, 255, 157, 0.2);
+            color: #00ff9d;
             padding: 8px 16px;
             border-radius: 8px;
             font-size: 14px;
@@ -264,7 +58,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: var(--theme-bg);
+            background: #1a1a1a;
             border-radius: 16px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.4);
             width: 300px;
@@ -272,20 +66,20 @@
             overflow: hidden;
         }
         .history-header {
-            background: var(--theme-card-bg);
+            background: #222;
             padding: 12px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #333;
-            color: var(--theme-accent);
+            color: #00ff9d;
             font-size: 14px;
             font-weight: 600;
         }
         .close-history {
             background: none;
             border: none;
-            color: var(--theme-accent);
+            color: #00ff9d;
             font-size: 20px;
             cursor: pointer;
             padding: 0 4px;
@@ -311,45 +105,8 @@
             cursor: pointer;
         }
 
-        .loading-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            text-align: center;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--theme-border);
-            border-top-color: var(--theme-accent);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 15px;
-        }
-
-        .loading-text {
-            color: var(--theme-accent);
-            font-size: 14px;
-            margin-bottom: 10px;
-            font-weight: 500;
-        }
-
-        .connection-time {
-            font-size: 12px;
-            color: var(--theme-secondary);
-            font-family: monospace;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
         .overlay-header {
-            background: var(--theme-card-bg);
+            background: #222;
             padding: 12px 16px;
             display: flex;
             justify-content: space-between;
@@ -360,13 +117,13 @@
         .overlay-title {
             font-weight: 600;
             font-size: 14px;
-            color: var(--theme-accent);
+            color: #00ff9d;
             letter-spacing: 0.5px;
         }
         .overlay-controls button {
             background: none;
             border: none;
-            color: var(--theme-accent);
+            color: #00ff9d;
             font-size: 14px;
             cursor: pointer;
             margin-left: 8px;
@@ -388,14 +145,14 @@
             opacity: 0;
         }
         .ip-content b {
-            color: var(--theme-accent);
+            color: #00ff9d;
             font-weight: 500;
         }
         .overlay-footer {
             padding: 8px 16px;
             font-size: 11px;
             color: #666;
-            background: var(--theme-card-bg);
+            background: #222;
             text-align: center;
             border-top: 1px solid #333;
         }
@@ -406,58 +163,38 @@
 
     document.body.appendChild(overlay);
 
-    const initializeControls = () => {
-        const toggleBtn = overlay.querySelector('#toggle-btn');
-        const censorBtn = overlay.querySelector('#censor-btn');
-        const historyBtn = overlay.querySelector('#history-btn');
-        const themeBtn = overlay.querySelector('#theme-btn');
-        const langBtn = overlay.querySelector('#lang-btn');
-        const contentDiv = overlay.querySelector('.ip-content');
-        const historyDiv = overlay.querySelector('.ip-history');
-
-        let isCensored = false;
-        let originalIP = '';
-        let lastIP = null;
-
-        toggleBtn.onclick = () => {
-            const isHidden = contentDiv.classList.contains('hidden');
-            contentDiv.classList.toggle('hidden');
-            historyDiv.style.display = 'none';
-            toggleBtn.innerText = isHidden ? '–' : '+';
-            if (isHidden) {
-                overlay.style.width = '320px';
-                overlay.style.height = 'auto';
-                contentDiv.style.display = 'block';
-            } else {
-                overlay.style.width = '40px';
-                overlay.style.height = '40px';
-                contentDiv.style.display = 'none';
-            }
-        };
-
-        langBtn.onclick = () => {
-            const languages = ['es', 'en', 'pt', 'fr', 'de'];
-            const currentIndex = languages.indexOf(currentLang);
-            currentLang = languages[(currentIndex + 1) % languages.length];
-            localStorage.setItem(LANG_KEY, currentLang);
-            updateInterface();
-            initializeControls();
-            if (lastIP) fetchIPInfo(lastIP);
-        };
-    };
-
-    initializeControls();
+    const toggleBtn = overlay.querySelector('#toggle-btn');
+    const censorBtn = overlay.querySelector('#censor-btn');
+    const historyBtn = overlay.querySelector('#history-btn');
+    const contentDiv = overlay.querySelector('.ip-content');
+    const historyDiv = overlay.querySelector('.ip-history');
 
     let isCensored = false;
     let originalIP = '';
     let lastIP = null;
+
+    toggleBtn.onclick = () => {
+        const isHidden = contentDiv.classList.contains('hidden');
+        contentDiv.classList.toggle('hidden');
+        historyDiv.style.display = 'none';
+        toggleBtn.innerText = isHidden ? '–' : '+';
+        if (isHidden) {
+            overlay.style.width = '320px';
+            overlay.style.height = 'auto';
+            contentDiv.style.display = 'block';
+        } else {
+            overlay.style.width = '40px';
+            overlay.style.height = '40px';
+            contentDiv.style.display = 'none';
+        }
+    };
 
     historyBtn.onclick = () => {
         const historyWindow = document.createElement('div');
         historyWindow.className = 'history-window';
         historyWindow.innerHTML = `
             <div class="history-header">
-                <span>${t('historyTitle')}</span>
+                <span>📜 Historial</span>
                 <button class="close-history">×</button>
             </div>
             <div class="history-content"></div>
@@ -486,14 +223,14 @@
     const saveToHistory = (entry) => {
         let history = JSON.parse(localStorage.getItem('ipHistory') || '[]');
         history.unshift(entry);
-        if (history.length > 5) history = history.slice(0, 5);
+        if (history.length > 5) history = history.slice(0, 5); // Solo 5 entradas
         localStorage.setItem('ipHistory', JSON.stringify(history));
     };
 
     const renderHistory = (container) => {
         let history = JSON.parse(localStorage.getItem('ipHistory') || '[]');
         if (!history.length) {
-            container.innerHTML = t('noHistory');
+            container.innerHTML = '📭 Sin historial todavía.';
             return;
         }
         container.innerHTML = history.map((h, i) => {
@@ -511,7 +248,7 @@
 
     const updateOverlay = (data) => {
         originalIP = data.ip;
-        const currentTime = new Date().toLocaleString(currentLang, {
+        const currentTime = new Date().toLocaleString('es-MX', {
             timeZone: data.time_zone.name,
             hour: '2-digit',
             minute: '2-digit',
@@ -523,7 +260,7 @@
                 copyToClipboard(value);
                 const notification = document.createElement('div');
                 notification.className = 'copy-notification';
-                notification.textContent = t('copied').replace('{label}', label);
+                notification.textContent = `✓ ${label} copiado`;
                 document.body.appendChild(notification);
                 setTimeout(() => notification.remove(), 2000);
             }
@@ -532,39 +269,39 @@
         const infoGroups = [
             {
                 icon: '🏙️',
-                label: t('city'),
+                label: 'Ciudad',
                 value: `${data.city}, ${data.state_prov}`
             },
             {
                 icon: '🌍',
-                label: t('country'),
+                label: 'País',
                 value: `${data.country_name} ${data.country_flag_emoji || ''}`
             },
             {
                 icon: '🔥',
-                label: t('ip'),
+                label: 'IP',
                 value: isCensored ? '***.***.***.***' : data.ip,
                 class: 'primary'
             },
             {
                 icon: '🌐',
-                label: t('continent'),
+                label: 'Continente',
                 value: data.continent_name
             },
             {
-                icon: '📍',
-                label: t('coords'),
+                icon: '�',
+                label: 'Coordenadas',
                 value: `${data.latitude}, ${data.longitude}`,
                 class: 'coords'
             },
             {
-                icon: '🌐',
-                label: t('isp'),
+                icon: '�️',
+                label: 'ISP',
                 value: data.isp
             },
             {
                 icon: '⏰',
-                label: t('localTime'),
+                label: 'Hora Local',
                 value: currentTime,
                 class: 'time'
             }
@@ -617,7 +354,7 @@
                 }
                 .info-label {
                     font-size: 11px;
-                    color: var(--theme-accent);
+                    color: #00ff9d;
                     margin-bottom: 2px;
                     text-transform: uppercase;
                     letter-spacing: 0.5px;
@@ -640,7 +377,7 @@
                 }
                 .info-item.time .info-value {
                     font-family: monospace;
-                    color: var(--theme-accent);
+                    color: #00ff9d;
                 }
                 @keyframes fadeIn {
                     from { opacity: 0; transform: translateY(10px); }
@@ -663,60 +400,49 @@
         overlay.style.color = '#ff4d4d';
     };
 
-    const getNextApiKey = () => {
-        currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length;
-        return API_KEYS[currentKeyIndex];
-    };
+    const API_KEYS = [
+        '1e761879cafa42e6aa93f3b682612acf',
+        '7adc7b2623c64ebda389cbb388a0aaea'
+    ];
+    let currentKeyIndex = 0;
+    let failedKeys = new Set();
 
     const fetchIPInfo = async (ip) => {
+        const initialKeyIndex = currentKeyIndex;
         let attempts = 0;
-        const maxAttempts = API_KEYS.length;
 
-        while (attempts < maxAttempts) {
-            try {
-                const currentKey = API_KEYS[currentKeyIndex];
-                const res = await fetch(`https://api.ipgeolocation.io/ipgeo?apiKey=${currentKey}&ip=${ip}`);
-                
-                if (res.ok) {
+        while (attempts < API_KEYS.length) {
+            if (failedKeys.size === API_KEYS.length) {
+                failedKeys.clear(); // Resetear las claves fallidas si todas han fallado
+            }
+
+            const apiKey = API_KEYS[currentKeyIndex];
+            
+            if (!failedKeys.has(apiKey)) {
+                try {
+                    const res = await fetch(`https://api.ipgeolocation.io/ipgeo?apiKey=${apiKey}&ip=${ip}`);
+                    if (!res.ok) {
+                        if (res.status === 429 || res.status === 403) { // Límite excedido o clave inválida
+                            failedKeys.add(apiKey);
+                            throw new Error(`API Key ${currentKeyIndex + 1} alcanzó su límite`);
+                        }
+                        throw new Error(`HTTP ${res.status}`);
+                    }
                     const json = await res.json();
                     updateOverlay(json);
                     return;
-                } else if (res.status === 403 || res.status === 429) {
-                    // Si la key está agotada o inválida, intentamos con la siguiente
-                    currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length;
-                } else {
-                    throw new Error(`HTTP ${res.status}`);
+                } catch (e) {
+                    console.warn(`Error con API Key ${currentKeyIndex + 1}:`, e.message);
+                    failedKeys.add(apiKey);
                 }
-            } catch (e) {
-                attempts++;
-                if (attempts === maxAttempts) {
-                    showError("No fue posible obtener info después de intentar con todas las API keys");
-                    return;
-                }
-                currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length;
             }
-        }
-        } catch (e) {
-            showError("No fue posible obtener info:\n" + e.message);
-        }
-    };
 
-    let connectionStartTime = null;
-    let loadingStates = ['connecting', 'analyzing', 'detecting', 'collecting', 'verifying'];
-    let currentLoadingState = 0;
-    let loadingInterval = null;
-
-    const updateLoadingState = () => {
-        if (contentDiv) {
-            contentDiv.innerHTML = `
-                <div class="loading-container">
-                    <div class="loading-spinner"></div>
-                    <div class="loading-text">${t(loadingStates[currentLoadingState])}</div>
-                    <div class="connection-time">${t('connectionTime').replace('{time}', Math.floor((Date.now() - connectionStartTime) / 1000))}</div>
-                </div>
-            `;
-            currentLoadingState = (currentLoadingState + 1) % loadingStates.length;
+            currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length;
+            attempts++;
         }
+
+        showError("No fue posible obtener info: Todas las API Keys han fallado");
+        currentKeyIndex = initialKeyIndex; // Restaurar el índice inicial
     };
 
     const handleCandidate = (candidate) => {
@@ -726,21 +452,7 @@
             const type = parts[7];
             if (type === 'srflx' && ip !== lastIP) {
                 lastIP = ip;
-                connectionStartTime = Date.now();
-                
-                // Iniciar animación de carga
-                if (loadingInterval) clearInterval(loadingInterval);
-                loadingInterval = setInterval(updateLoadingState, 800);
-                updateLoadingState();
-
-                // Esperar 5 segundos antes de hacer la solicitud
-                setTimeout(() => {
-                    if (loadingInterval) {
-                        clearInterval(loadingInterval);
-                        loadingInterval = null;
-                    }
-                    fetchIPInfo(ip);
-                }, 5000);
+                fetchIPInfo(ip);
             }
         } catch (e) {
             showError("Error ICE:\n" + e.message);
@@ -785,43 +497,9 @@
     });
 
     document.addEventListener('mouseup', () => {
-        if (isDragging) {
-            isDragging = false;
-            document.body.style.userSelect = '';
-            // Guardar la posición
-            localStorage.setItem(POSITION_KEY, JSON.stringify({
-                top: overlay.style.top,
-                left: overlay.style.left
-            }));
-        }
+        isDragging = false;
+        document.body.style.userSelect = '';
     });
-
-    // Sistema de tooltips
-    const tooltip = document.createElement('div');
-    tooltip.className = 'tooltip';
-    document.body.appendChild(tooltip);
-
-    document.querySelectorAll('[title]').forEach(el => {
-        el.addEventListener('mouseenter', (e) => {
-            tooltip.textContent = e.target.getAttribute('title');
-            tooltip.style.opacity = '1';
-            const rect = e.target.getBoundingClientRect();
-            tooltip.style.top = `${rect.bottom + 5}px`;
-            tooltip.style.left = `${rect.left + (rect.width - tooltip.offsetWidth) / 2}px`;
-        });
-
-        el.addEventListener('mouseleave', () => {
-            tooltip.style.opacity = '0';
-        });
-    });
-
-    // Botón de tema
-    const themeBtn = overlay.querySelector('#theme-btn');
-    themeBtn.onclick = () => {
-        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        localStorage.setItem(THEME_KEY, currentTheme);
-        applyTheme(currentTheme);
-    };
 
     console.log("✅ HUD IP activo con historial 📜");
 })();
