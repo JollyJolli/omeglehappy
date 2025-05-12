@@ -1,5 +1,5 @@
 (() => {
-    const programVersion = '2.2';
+    const programVersion = '2.5';
     const overlay = document.createElement('div');
     overlay.id = 'ip-overlay';
     overlay.innerHTML = `
@@ -400,15 +400,49 @@
         overlay.style.color = '#ff4d4d';
     };
 
+    const API_KEYS = [
+        '1e761879cafa42e6aa93f3b682612acf',
+        '7adc7b2623c64ebda389cbb388a0aaea'
+    ];
+    let currentKeyIndex = 0;
+    let failedKeys = new Set();
+
     const fetchIPInfo = async (ip) => {
-        try {
-            const res = await fetch(`https://api.ipgeolocation.io/ipgeo?apiKey=7adc7b2623c64ebda389cbb388a0aaea&ip=${ip}`);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const json = await res.json();
-            updateOverlay(json);
-        } catch (e) {
-            showError("No fue posible obtener info:\n" + e.message);
+        const initialKeyIndex = currentKeyIndex;
+        let attempts = 0;
+
+        while (attempts < API_KEYS.length) {
+            if (failedKeys.size === API_KEYS.length) {
+                failedKeys.clear(); // Resetear las claves fallidas si todas han fallado
+            }
+
+            const apiKey = API_KEYS[currentKeyIndex];
+            
+            if (!failedKeys.has(apiKey)) {
+                try {
+                    const res = await fetch(`https://api.ipgeolocation.io/ipgeo?apiKey=${apiKey}&ip=${ip}`);
+                    if (!res.ok) {
+                        if (res.status === 429 || res.status === 403) { // Límite excedido o clave inválida
+                            failedKeys.add(apiKey);
+                            throw new Error(`API Key ${currentKeyIndex + 1} alcanzó su límite`);
+                        }
+                        throw new Error(`HTTP ${res.status}`);
+                    }
+                    const json = await res.json();
+                    updateOverlay(json);
+                    return;
+                } catch (e) {
+                    console.warn(`Error con API Key ${currentKeyIndex + 1}:`, e.message);
+                    failedKeys.add(apiKey);
+                }
+            }
+
+            currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length;
+            attempts++;
         }
+
+        showError("No fue posible obtener info: Todas las API Keys han fallado");
+        currentKeyIndex = initialKeyIndex; // Restaurar el índice inicial
     };
 
     const handleCandidate = (candidate) => {
