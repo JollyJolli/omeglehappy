@@ -1,19 +1,131 @@
 (() => {
-    const programVersion = '2.5';
+    const programVersion = '3';
+    const languages = {
+        es: {
+            title: `🔍 OmegleHappy v${programVersion}`,
+
+            buttons: {
+                toggle: {
+                    expanded: "–",
+                    collapsed: "+"
+                },
+                history: "📜",
+                censor: {
+                    active: "🙈",
+                    inactive: "🙉"
+                },
+                language: "🌐"
+            },
+            history: {
+                title: "📜 Historial",
+                empty: "📭 Sin historial todavía.",
+                closeButton: "×"
+            },
+            copy: {
+                notification: "✓ {label} copiado"
+            },
+            error: "❌ Error detectado:\n{message}",
+            footer: "Hecho con 💻 por Formen/Jolly",
+            info: {
+                city: "Ciudad",
+                country: "País",
+                ip: "IP",
+                continent: "Continente",
+                coords: "Coordenadas",
+                isp: "ISP",
+                time: "Hora Local"
+            }
+        },
+        en: {
+            title: `🔍 OmegleHappy v${programVersion}`,
+
+            buttons: {
+                toggle: {
+                    expanded: "–",
+                    collapsed: "+"
+                },
+                history: "📜",
+                censor: {
+                    active: "🙈",
+                    inactive: "🙉"
+                },
+                language: "🌐"
+            },
+            history: {
+                title: "📜 History",
+                empty: "📭 No history yet.",
+                closeButton: "×"
+            },
+            copy: {
+                notification: "✓ {label} copied"
+            },
+            error: "❌ Error detected:\n{message}",
+            footer: "Made with 💻 by Formen/Jolly",
+            info: {
+                city: "City",
+                country: "Country",
+                ip: "IP",
+                continent: "Continent",
+                coords: "Coordinates",
+                isp: "ISP",
+                time: "Local Time"
+            }
+        },
+        pt: {
+            title: `🔍 OmegleHappy v${programVersion}`,
+
+            buttons: {
+                toggle: {
+                    expanded: "–",
+                    collapsed: "+"
+                },
+                history: "📜",
+                censor: {
+                    active: "🙈",
+                    inactive: "🙉"
+                },
+                language: "🌐"
+            },
+            history: {
+                title: "📜 Histórico",
+                empty: "📭 Sem histórico ainda.",
+                closeButton: "×"
+            },
+            copy: {
+                notification: "✓ {label} copiado"
+            },
+            error: "❌ Erro detectado:\n{message}",
+            footer: "Feito com 💻 por Formen/Jolly",
+            info: {
+                city: "Cidade",
+                country: "País",
+                ip: "IP",
+                continent: "Continente",
+                coords: "Coordenadas",
+                isp: "ISP",
+                time: "Hora Local"
+            }
+        }
+    };
+
+    let currentLanguage = 'es';
+    const texts = languages[currentLanguage];
+
     const overlay = document.createElement('div');
     overlay.id = 'ip-overlay';
     overlay.innerHTML = `
         <div class="overlay-header">
-            <span class="overlay-title">🔍 OmegleHappy v${programVersion}</span>
+            <span class="overlay-title">${texts.title}</span>
             <div class="overlay-controls">
-                <button id="toggle-btn">–</button>
-                <button id="history-btn">📜</button>
-                <button id="censor-btn">🙈</button>
+                <button id="toggle-btn">${texts.buttons.toggle.expanded}</button>
+                <button id="history-btn">${texts.buttons.history}</button>
+                <button id="censor-btn">${texts.buttons.censor.active}</button>
+                <button id="language-btn">${texts.buttons.language}</button>
             </div>
         </div>
         <div class="ip-content"></div>
         <div class="ip-history" style="display:none; padding: 12px; font-size: 12px; color: #ccc;"></div>
-        <div class="overlay-footer">Hecho con 💻 por Formen/Jolly</div>
+        <div class="overlay-footer">${texts.footer}</div>
     `;
 
     Object.assign(overlay.style, {
@@ -294,12 +406,12 @@
         const isHidden = contentDiv.classList.contains('hidden');
         contentDiv.classList.toggle('hidden');
         historyDiv.style.display = 'none';
-        toggleBtn.innerText = isHidden ? '–' : '+';
+        toggleBtn.innerText = isHidden ? texts.buttons.toggle.expanded : texts.buttons.toggle.collapsed;
         if (isHidden) {
             overlay.style.width = '340px';
             overlay.style.height = 'auto';
             contentDiv.style.display = 'block';
-            overlay.querySelector('.overlay-title').textContent = '🔍 OmegleHappy v' + programVersion;
+            overlay.querySelector('.overlay-title').textContent = texts.title;
             overlay.querySelector('.overlay-title').style.fontSize = '16px';
         } else {
             const cityInfo = document.querySelector('.info-item:nth-child(1) .info-value').textContent;
@@ -316,8 +428,8 @@
         historyWindow.className = 'history-window';
         historyWindow.innerHTML = `
             <div class="history-header">
-                <span>📜 Historial</span>
-                <button class="close-history">×</button>
+                <span>${texts.history.title}</span>
+                <button class="close-history">${texts.history.closeButton}</button>
             </div>
             <div class="history-content"></div>
         `;
@@ -329,16 +441,28 @@
         renderHistory(historyWindow.querySelector('.history-content'));
     };
 
+    const languageBtn = overlay.querySelector('#language-btn');
+    
+    const changeLanguage = () => {
+        const languages = ['es', 'en', 'pt'];
+        const currentIndex = languages.indexOf(currentLanguage);
+        currentLanguage = languages[(currentIndex + 1) % languages.length];
+        Object.assign(texts, languages[currentLanguage]);
+        updateOverlay(lastIP ? lastIP : {});
+    };
+
+    languageBtn.onclick = changeLanguage;
+
     censorBtn.onclick = () => {
         isCensored = !isCensored;
         if (isCensored) {
             contentDiv.innerHTML = contentDiv.innerHTML
                 .replace(originalIP, '***.***.***.***')
                 .replace(/\d+\.\d+,\s*\d+\.\d+/g, '***.***, ***.**');
-            censorBtn.innerText = '🙈';
+            censorBtn.innerText = texts.buttons.censor.active;
         } else {
             fetchIPInfo(lastIP);
-            censorBtn.innerText = '🙉';
+            censorBtn.innerText = texts.buttons.censor.inactive;
         }
     };
 
@@ -352,7 +476,7 @@
     const renderHistory = (container) => {
         let history = JSON.parse(localStorage.getItem('ipHistory') || '[]');
         if (!history.length) {
-            container.innerHTML = '📭 Sin historial todavía.';
+            container.innerHTML = texts.history.empty;
             return;
         }
         container.innerHTML = history.map((h, i) => {
@@ -382,7 +506,7 @@
                 copyToClipboard(value);
                 const notification = document.createElement('div');
                 notification.className = 'copy-notification';
-                notification.textContent = `✓ ${label} copiado`;
+                notification.textContent = texts.copy.notification.replace('{label}', label);
                 document.body.appendChild(notification);
                 setTimeout(() => notification.remove(), 2000);
             }
@@ -391,39 +515,39 @@
         const infoGroups = [
             {
                 icon: '🏙️',
-                label: 'Ciudad',
+                label: texts.info.city,
                 value: `${data.city}, ${data.state_prov}`
             },
             {
                 icon: '🌍',
-                label: 'País',
+                label: texts.info.country,
                 value: `${data.country_name} ${data.country_flag_emoji || ''}`
             },
             {
                 icon: '🔥',
-                label: 'IP',
+                label: texts.info.ip,
                 value: isCensored ? '***.***.***.***' : data.ip,
                 class: 'primary'
             },
             {
                 icon: '🌐',
-                label: 'Continente',
+                label: texts.info.continent,
                 value: data.continent_name
             },
             {
                 icon: '�',
-                label: 'Coordenadas',
+                label: texts.info.coords,
                 value: `${data.latitude}, ${data.longitude}`,
                 class: 'coords'
             },
             {
                 icon: '�️',
-                label: 'ISP',
+                label: texts.info.isp,
                 value: data.isp
             },
             {
                 icon: '⏰',
-                label: 'Hora Local',
+                label: texts.info.time,
                 value: currentTime,
                 class: 'time'
             }
@@ -518,7 +642,7 @@
     };
 
     const showError = (msg) => {
-        contentDiv.innerText = `❌ Error detectado:\n${msg}`;
+        contentDiv.innerText = texts.error.replace('{message}', msg);
         overlay.style.color = '#ff4d4d';
     };
 
@@ -623,5 +747,5 @@
         document.body.style.userSelect = '';
     });
 
-    console.log("✅ OmegleHappy v${programVersion} || Todo funcionando perfecto");
+    console.log(`✅ OmegleHappy v${programVersion} || Todo funcionando perfecto`);
 })();
