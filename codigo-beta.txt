@@ -1,5 +1,5 @@
 (() => {
-    const programVersion = '3';
+    const programVersion = 'A3';
     const languages = {
         es: {
             title: `🔍 OmegleHappy v${programVersion}`,
@@ -109,7 +109,7 @@
     };
 
     let currentLanguage = 'es';
-    const texts = languages[currentLanguage];
+    let texts = languages[currentLanguage];
 
     const overlay = document.createElement('div');
     overlay.id = 'ip-overlay';
@@ -408,18 +408,10 @@
         historyDiv.style.display = 'none';
         toggleBtn.innerText = isHidden ? texts.buttons.toggle.expanded : texts.buttons.toggle.collapsed;
         if (isHidden) {
-            overlay.style.width = '340px';
-            overlay.style.height = 'auto';
             contentDiv.style.display = 'block';
-            overlay.querySelector('.overlay-title').textContent = texts.title;
-            overlay.querySelector('.overlay-title').style.fontSize = '16px';
+            updateOverlay(lastIP ? lastIP : {});
         } else {
-            const cityInfo = document.querySelector('.info-item:nth-child(1) .info-value').textContent;
-            overlay.style.width = '340px';
-            overlay.style.height = '60px';
             contentDiv.style.display = 'none';
-            overlay.querySelector('.overlay-title').textContent = cityInfo;
-            overlay.querySelector('.overlay-title').style.fontSize = '16px';
         }
     };
 
@@ -444,10 +436,10 @@
     const languageBtn = overlay.querySelector('#language-btn');
     
     const changeLanguage = () => {
-        const languages = ['es', 'en', 'pt'];
-        const currentIndex = languages.indexOf(currentLanguage);
-        currentLanguage = languages[(currentIndex + 1) % languages.length];
-        Object.assign(texts, languages[currentLanguage]);
+        const languagesList = ['es', 'en', 'pt'];
+        const currentIndex = languagesList.indexOf(currentLanguage);
+        currentLanguage = languagesList[(currentIndex + 1) % languagesList.length];
+        texts = languages[currentLanguage];
         updateOverlay(lastIP ? lastIP : {});
     };
 
@@ -455,15 +447,8 @@
 
     censorBtn.onclick = () => {
         isCensored = !isCensored;
-        if (isCensored) {
-            contentDiv.innerHTML = contentDiv.innerHTML
-                .replace(originalIP, '***.***.***.***')
-                .replace(/\d+\.\d+,\s*\d+\.\d+/g, '***.***, ***.**');
-            censorBtn.innerText = texts.buttons.censor.active;
-        } else {
-            fetchIPInfo(lastIP);
-            censorBtn.innerText = texts.buttons.censor.inactive;
-        }
+        censorBtn.innerText = isCensored ? texts.buttons.censor.active : texts.buttons.censor.inactive;
+        updateOverlay(lastIP ? lastIP : {});
     };
 
     const saveToHistory = (entry) => {
@@ -493,22 +478,27 @@
     };
 
     const updateOverlay = (data) => {
-        originalIP = data.ip;
-        const currentTime = new Date().toLocaleString('es-MX', {
-            timeZone: data.time_zone.name,
+        if (!data) return;
+        lastIP = data;
+        originalIP = data.ip || '';
+        const currentTime = new Date().toLocaleString(currentLanguage === 'es' ? 'es-MX' : currentLanguage === 'pt' ? 'pt-BR' : 'en-US', {
+            timeZone: (data.time_zone && data.time_zone.name) ? data.time_zone.name : 'UTC',
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit'
         });
+        texts = languages[currentLanguage];
     
         const handleInfoClick = (value, label) => {
             if (!isCensored) {
                 copyToClipboard(value);
                 const notification = document.createElement('div');
                 notification.className = 'copy-notification';
-                notification.textContent = texts.copy.notification.replace('{label}', label);
-                document.body.appendChild(notification);
-                setTimeout(() => notification.remove(), 2000);
+                if (texts && texts.copy && texts.copy.notification) {
+                    notification.textContent = texts.copy.notification.replace('{label}', label);
+                    document.body.appendChild(notification);
+                    setTimeout(() => notification.remove(), 2000);
+                }
             }
         };
     
@@ -526,18 +516,18 @@
             {
                 icon: '🔥',
                 label: texts.info.ip,
-                value: isCensored ? '***.***.***.***' : data.ip,
+                value: isCensored ? '***.***.***.***' : (data.ip || ''),
                 class: 'primary'
             },
             {
                 icon: '🌐',
                 label: texts.info.continent,
-                value: data.continent_name
+                value: data.continent_name || ''
             },
             {
                 icon: '�',
                 label: texts.info.coords,
-                value: `${data.latitude}, ${data.longitude}`,
+                value: isCensored ? '**.**, **.**' : `${data.latitude || ''}, ${data.longitude || ''}`,
                 class: 'coords'
             },
             {
