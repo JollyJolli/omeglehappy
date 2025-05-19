@@ -1,5 +1,5 @@
 (() => {
-    const programVersion = 'A3';
+    const programVersion = 'B3';
     const languages = {
         es: {
             title: `🔍 OmegleHappy v${programVersion}`,
