@@ -1,0 +1,162 @@
+// 1. Open inspector with CTRL+SHIFT+I
+// 2. Select the console tab in the top
+// 3. Paste the script
+// 4. Press enter
+// 5. Hover over your own video, and there should be a video switcher that looks horrible but works.
+
+const localVideo = document.getElementById("local-video");
+
+if (localVideo) {
+    // Create a dropdown element for the camera switcher
+    const cameraSwitcher = document.createElement("select");
+
+    // Populate the dropdown with available cameras
+
+    const option = document.createElement("option");
+
+    option.value = "";
+    option.text = "Select camera";
+    option.disabled = true;
+    option.selected = true;
+
+    cameraSwitcher.appendChild(option);
+
+    navigator.mediaDevices
+        .enumerateDevices()
+        .then((devices) => {
+            devices
+                .filter((device) => device.kind === "videoinput")
+                .forEach((device) => {
+                    const option = document.createElement("option");
+                    option.value = device.deviceId;
+                    option.text =
+                        device.label ||
+                        `Camera ${cameraSwitcher.options.length + 1}`;
+                    cameraSwitcher.appendChild(option);
+                });
+        })
+        .catch((error) => {
+            console.error("Error enumerating devices:", error);
+        });
+
+    // Add an event listener to switch the camera when an option is selected
+    cameraSwitcher.addEventListener("change", function () {
+        const selectedDeviceId = this.value;
+
+        if (!selectedDeviceId) {
+            return;
+        }
+
+        // Stop the current video stream
+        if (localVideo.srcObject) {
+            const tracks = localVideo.srcObject.getTracks();
+            tracks.forEach((track) => track.stop());
+        }
+
+        // Get user media with the selected camera
+        navigator.mediaDevices
+            .getUserMedia({ video: { deviceId: selectedDeviceId } })
+            .then((stream) => {
+                // Assign the new stream to the video element
+                localVideo.srcObject = stream;
+            })
+            .catch((error) => {
+                console.error("Error accessing camera:", error);
+            });
+    });
+
+    // Create a microphone switcher dropdown
+    const microphoneSwitcher = document.createElement("select");
+
+    // Populate the dropdown with available microphones
+    const microphoneOption = document.createElement("option");
+    microphoneOption.value = "";
+    microphoneOption.text = "Select microphone";
+    microphoneOption.disabled = true;
+    microphoneOption.selected = true;
+
+    microphoneSwitcher.appendChild(microphoneOption);
+
+    navigator.mediaDevices
+        .enumerateDevices()
+        .then((devices) => {
+            devices
+                .filter((device) => device.kind === "audioinput")
+                .forEach((device) => {
+                    console.log("Adding options");
+                    const option = document.createElement("option");
+                    option.value = device.deviceId;
+                    option.text =
+                        device.label ||
+                        `Microphone ${microphoneSwitcher.options.length + 1}`;
+                    microphoneSwitcher.appendChild(option);
+                });
+        })
+        .catch((error) => {
+            console.error("Error enumerating devices:", error);
+        });
+    
+    // Add an event listener to switch the microphone when an option is selected
+    console.log("Adding event listener");
+    microphoneSwitcher.addEventListener("change", function () {
+        const selectedDeviceId = this.value;
+
+        console.log("1");
+
+        if (!selectedDeviceId) {
+            return;
+        }
+
+        const currentStream = localVideo.srcObject.clone();
+
+        // Stop the current video stream
+        if (localVideo.srcObject) {
+            console.log("Stopping the current stream");
+            const tracks = localVideo.srcObject.getTracks();
+            tracks.forEach((track) => track.stop());
+        }
+
+        console.log("Is changing", currentStream);
+
+        if (currentStream) {
+            const videoTracks = currentStream.getVideoTracks();
+
+            navigator.mediaDevices
+                .getUserMedia({ audio: { deviceId: selectedDeviceId } })
+                .then((audioStream) => {
+                    // Combine the current video tracks with the new audio stream
+                    console.log("We got the audio steam");
+                    const combinedStream = new MediaStream([
+                        ...videoTracks,
+                        ...audioStream.getAudioTracks(),
+                    ]);
+                    console.log("It is combined");
+                    localVideo.srcObject = combinedStream;
+                })
+                .catch((error) => {
+                    console.error("Error accessing microphone:", error);
+                });
+        }
+    });
+    // add audio playback so we can hear ourselves
+    localVideo.muted = false;
+
+    const mediaDevicesFrame = document.querySelector(".media-devices__frame");
+    
+    if (mediaDevicesFrame) {
+        // Add the camera switcher dropdown as a child to media-devices__frame
+        mediaDevicesFrame.appendChild(cameraSwitcher);
+
+        // Add the microphone switcher dropdown as a child to media-devices__frame
+        mediaDevicesFrame.appendChild(microphoneSwitcher);
+    }
+
+    const theirElements = document.querySelector(".media-devices__wrapper");
+
+    if (theirElements) {
+        //remove
+        theirElements.remove();
+    }
+} else {
+    console.error("Element with ID 'local-video' not found.");
+}
