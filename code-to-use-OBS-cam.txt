@@ -7,18 +7,13 @@
 const localVideo = document.getElementById("local-video");
 
 if (localVideo) {
-    // Create a dropdown element for the camera switcher
     const cameraSwitcher = document.createElement("select");
 
-    // Populate the dropdown with available cameras
-
     const option = document.createElement("option");
-
     option.value = "";
     option.text = "Select camera";
     option.disabled = true;
     option.selected = true;
-
     cameraSwitcher.appendChild(option);
 
     navigator.mediaDevices
@@ -39,7 +34,6 @@ if (localVideo) {
             console.error("Error enumerating devices:", error);
         });
 
-    // Add an event listener to switch the camera when an option is selected
     cameraSwitcher.addEventListener("change", function () {
         const selectedDeviceId = this.value;
 
@@ -47,17 +41,14 @@ if (localVideo) {
             return;
         }
 
-        // Stop the current video stream
         if (localVideo.srcObject) {
             const tracks = localVideo.srcObject.getTracks();
             tracks.forEach((track) => track.stop());
         }
 
-        // Get user media with the selected camera
         navigator.mediaDevices
             .getUserMedia({ video: { deviceId: selectedDeviceId } })
             .then((stream) => {
-                // Assign the new stream to the video element
                 localVideo.srcObject = stream;
             })
             .catch((error) => {
@@ -65,16 +56,13 @@ if (localVideo) {
             });
     });
 
-    // Create a microphone switcher dropdown
     const microphoneSwitcher = document.createElement("select");
 
-    // Populate the dropdown with available microphones
     const microphoneOption = document.createElement("option");
     microphoneOption.value = "";
     microphoneOption.text = "Select microphone";
     microphoneOption.disabled = true;
     microphoneOption.selected = true;
-
     microphoneSwitcher.appendChild(microphoneOption);
 
     navigator.mediaDevices
@@ -83,7 +71,6 @@ if (localVideo) {
             devices
                 .filter((device) => device.kind === "audioinput")
                 .forEach((device) => {
-                    console.log("Adding options");
                     const option = document.createElement("option");
                     option.value = device.deviceId;
                     option.text =
@@ -95,13 +82,9 @@ if (localVideo) {
         .catch((error) => {
             console.error("Error enumerating devices:", error);
         });
-    
-    // Add an event listener to switch the microphone when an option is selected
-    console.log("Adding event listener");
+
     microphoneSwitcher.addEventListener("change", function () {
         const selectedDeviceId = this.value;
-
-        console.log("1");
 
         if (!selectedDeviceId) {
             return;
@@ -109,14 +92,10 @@ if (localVideo) {
 
         const currentStream = localVideo.srcObject.clone();
 
-        // Stop the current video stream
         if (localVideo.srcObject) {
-            console.log("Stopping the current stream");
             const tracks = localVideo.srcObject.getTracks();
             tracks.forEach((track) => track.stop());
         }
-
-        console.log("Is changing", currentStream);
 
         if (currentStream) {
             const videoTracks = currentStream.getVideoTracks();
@@ -124,13 +103,10 @@ if (localVideo) {
             navigator.mediaDevices
                 .getUserMedia({ audio: { deviceId: selectedDeviceId } })
                 .then((audioStream) => {
-                    // Combine the current video tracks with the new audio stream
-                    console.log("We got the audio steam");
                     const combinedStream = new MediaStream([
                         ...videoTracks,
                         ...audioStream.getAudioTracks(),
                     ]);
-                    console.log("It is combined");
                     localVideo.srcObject = combinedStream;
                 })
                 .catch((error) => {
@@ -138,25 +114,61 @@ if (localVideo) {
                 });
         }
     });
-    // add audio playback so we can hear ourselves
+
     localVideo.muted = false;
 
     const mediaDevicesFrame = document.querySelector(".media-devices__frame");
-    
-    if (mediaDevicesFrame) {
-        // Add the camera switcher dropdown as a child to media-devices__frame
-        mediaDevicesFrame.appendChild(cameraSwitcher);
 
-        // Add the microphone switcher dropdown as a child to media-devices__frame
+    if (mediaDevicesFrame) {
+        mediaDevicesFrame.appendChild(cameraSwitcher);
         mediaDevicesFrame.appendChild(microphoneSwitcher);
     }
 
     const theirElements = document.querySelector(".media-devices__wrapper");
-
     if (theirElements) {
-        //remove
         theirElements.remove();
     }
+
+    // 🎨 CSS pa' que no se vea feito
+    const style = document.createElement("style");
+    style.textContent = `
+        select {
+            background-color: #1e1e1e !important;
+            color: #ffffff !important;
+            border: 2px solid #00ffcc !important;
+            border-radius: 6px !important;
+            padding: 8px !important;
+            font-size: 14px !important;
+            margin: 5px 0 !important;
+            outline: none !important;
+            transition: 0.3s ease !important;
+        }
+
+        select:hover {
+            border-color: #00ffff !important;
+            background-color: #2a2a2a !important;
+        }
+
+        select:focus {
+            box-shadow: 0 0 5px #00ffcc !important;
+        }
+
+        .media-devices__frame {
+            background-color: rgba(0, 0, 0, 0.8) !important;
+            padding: 15px !important;
+            border-radius: 10px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 10px !important;
+            z-index: 9999 !important;
+        }
+
+        .media-devices__frame label {
+            color: #ffffff !important;
+            font-weight: bold !important;
+        }
+    `;
+    document.head.appendChild(style);
 } else {
     console.error("Element with ID 'local-video' not found.");
 }
