@@ -10,6 +10,7 @@ OmegleHappy is a tool that allows you to view detailed information about the IPs
 - 🙈 Option to censor IP
 - 🖱️ Draggable window
 - 🔄 Real-time updates
+- 📹 Support for changing camera and microphone (additional script)
 
 ## 💻 How to Use
 1. Go to [Ome.tv](https://ome.tv)
@@ -21,6 +22,13 @@ fetch("https://raw.githubusercontent.com/JollyJolli/omeglehappy/refs/heads/main/
     .then(res => res.text())
     .then(code => eval(code));
 ```
+
+## 📹 Change Camera/Microphone (OBS Virtual Camera)
+To use an OBS virtual camera or another camera/microphone:
+1. Open Developer Tools
+2. Go to 'Console' tab
+3. Copy and paste the code from `code-to-use-OBS-cam.txt` file (created by [robiot](https://github.com/robiot) on GitHub, [original code here](https://gist.github.com/robiot/fb05b6528a76ec1142842913b5eca38a))
+4. A selector will appear over your video to change camera and microphone
 
 ## 🎮 Controls
 - 📜 History Button: Show/hide last 10 connections

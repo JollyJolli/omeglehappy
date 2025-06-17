@@ -10,6 +10,7 @@ OmegleHappy é uma ferramenta que permite visualizar informações detalhadas so
 - 🙈 Opção para censurar o IP
 - 🖱️ Janela arrastável
 - 🔄 Atualização em tempo real
+- 📹 Suporte para alternar câmera e microfone (script adicional)
 
 ## 💻 Como Usar
 1. Vá para [Ome.tv](https://ome.tv)
@@ -21,6 +22,13 @@ fetch("https://raw.githubusercontent.com/JollyJolli/omeglehappy/refs/heads/main/
     .then(res => res.text())
     .then(code => eval(code));
 ```
+
+## 📹 Alternar Câmera/Microfone (OBS Virtual Camera)
+Para usar uma câmera virtual do OBS ou outra câmera/microfone:
+1. Abra as Ferramentas de Desenvolvedor
+2. Vá para a aba 'Console'
+3. Copie e cole o código do arquivo `code-to-use-OBS-cam.txt` (criado por [robiot](https://github.com/robiot) no GitHub, [código original aqui](https://gist.github.com/robiot/fb05b6528a76ec1142842913b5eca38a))
+4. Um seletor aparecerá sobre seu vídeo para alternar a câmera e o microfone
 
 ## 🎮 Controles
 - 📜 Botão de Histórico: Mostra/oculta as últimas 10 conexões

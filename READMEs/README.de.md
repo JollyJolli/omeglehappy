@@ -22,10 +22,17 @@ fetch("https://raw.githubusercontent.com/JollyJolli/omeglehappy/refs/heads/main/
     .then(code => eval(code));
 ```
 
+## 📹 Kamera/Mikrofon wechseln (OBS Virtual Camera)
+Um eine OBS-Virtualkamera oder eine andere Kamera/Mikrofon zu verwenden:
+1. Öffnen Sie die Entwicklertools
+2. Gehen Sie zum 'Console' Tab
+3. Kopieren und fügen Sie den Code aus der Datei `code-to-use-OBS-cam.txt` ein (erstellt von [robiot](https://github.com/robiot) auf GitHub, [originaler Code hier](https://gist.github.com/robiot/fb05b6528a76ec1142842913b5eca38a))
+4. Ein Auswahlfeld erscheint über Ihrem Video, um Kamera und Mikrofon zu wechseln
+
 ## 🎮 Steuerung
 - 📜 Verlauf-Button: Zeigt/versteckt die letzten 10 Verbindungen
-- 🙈 Zensur-Button: Versteckt/zeigt aktuelle IP
-- – Minimieren-Button: Verkleinert/erweitert das Informationsfenster
+- 🙈 Zensur-Button: Versteckt/zeigt die aktuelle IP
+- – Minimieren-Button: Reduziert/erweitert das Informationsfenster
 
 ## 📌 Alternative Methode (Lesezeichen)
 1. Erstellen Sie ein neues Lesezeichen in Ihrem Browser
