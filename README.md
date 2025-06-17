@@ -3,13 +3,7 @@
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/JollyJolli/omeglehappy)
 
 ## 🌎 Languages
-| Language | Docs |
-|----------|------|
-| Español 🇪🇸 | [README.md](README.md) |
-| English 🇬🇧 | [README.en.md](READMEs/README.en.md) |
-| Français 🇫🇷 | [README.fr.md](READMEs/README.fr.md) |
-| Deutsch 🇩🇪 | [README.de.md](READMEs/README.de.md) |
-| Português 🇵🇹 | [README.pt.md](READMEs/README.pt.md) |
+[🇪🇸 Español](README.md) • [🇬🇧 English](READMEs/README.en.md) • [🇫🇷 Français](READMEs/README.fr.md) • [🇩🇪 Deutsch](READMEs/README.de.md) • [🇵🇹 Português](READMEs/README.pt.md)
 
 ## 📋 Descripción
 OmegleHappy es una herramienta que te permite ver información detallada sobre las IPs de las personas con las que te conectas en Ome.tv, incluyendo su ubicación, zona horaria y más.
