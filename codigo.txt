@@ -738,4 +738,47 @@
     });
 
     console.log(`✅ OmegleHappy v${programVersion} || Todo funcionando perfecto`);
+
+// Configuración de Google Analytics
+    const GA_MEASUREMENT_ID = 'G-6FWGWGLGYF';
+
+    // Función para inicializar Google Analytics
+    const initializeGA = () => {
+        // Cargar gtag script
+        const gtagScript = document.createElement('script');
+        gtagScript.async = true;
+        gtagScript.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+        document.head.appendChild(gtagScript);
+
+        // Configurar gtag
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', GA_MEASUREMENT_ID, {
+            page_title: 'OmegleHappy Extension',
+            page_location: window.location.href,
+            custom_map: {
+                'custom_parameter_1': 'extension_version'
+            }
+        });
+
+        // Hacer gtag disponible globalmente para el resto del código
+        window.gtag = gtag;
+    };
+
+    // Función para enviar eventos a GA
+    const trackEvent = (eventName, parameters = {}) => {
+        if (window.gtag) {
+            window.gtag('event', eventName, {
+                event_category: 'OmegleHappy',
+                event_label: parameters.label || '',
+                value: parameters.value || 0,
+                custom_parameter_1: programVersion,
+                ...parameters
+            });
+        }
+    };
+
+    // Inicializar GA
+    initializeGA();
 })();
